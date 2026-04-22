@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+session=${1}
+if [[ -z ${session} ]]; then exit 0; fi
+
+session=${session:2} # strip icon
+sleepings=$(comm -23 <(lazy-tmux list | cut -f1 | sort) <(tmux list-sessions -F '#{session_name}' | sort))
+
+for item in ${sleepings}; do
+	if [[ ${item} == "${session}" ]]; then
+		tmux run -b "tmux-spinner 'restoring session ${session}'"
+		lazy-tmux restore --session "${session}" &&
+			tmux run "tmux-hx-session restore ${session}" &>/dev/null
+		tmux run 'tmux-spinner'
+		exit 0
+	fi
+done
+
+# tmux display-message "connect to ${session}"
+sesh connect "${session}"
