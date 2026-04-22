@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+#
+# List:
+#   - active tmux sessions
+#   - unactived stored session
+#   - zoxide directories
+#
+# each item has an icon prepend
+#
+sessions=$(sesh list --tmux --icons)
+sleepings=$(comm -23 <(lazy-tmux list | cut -f1 | sort) <(tmux list-sessions -F '#{session_name}' | sort))
+rests=$(sesh list --config --zoxide --icons)
+
+while IFS= read -r line; do
+	[[ -n ${line} ]] && sessions+="\n ${line}"
+done <<<"${sleepings}"
+
+echo -e "${sessions}\n${rests}"
