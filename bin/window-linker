@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+#
+# Window-Linker
+#
+# A Tmux Menu listing windows to link against.
+#
+start_point=${1:-1}
+SAFE_V_MARGIN=7
+KEYS=(a b c d e f g h i j k l m n o p q r s t u v w
+	x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z)
+max_items=$(($(tmux display-message -p "#{window_height}") - SAFE_V_MARGIN))
+current=$(tmux display -p -F "#{session_name}")
+background="$(tmux show-options -gv '@rendez-vous-linker-bg')"
+foreground="$(tmux show-options -gv '@rendez-vous-linker-fg')"
+border="$(tmux show-options -gv '@rendez-vous-linker-border')"
+menu=()
+key_count=0
+key_view=0
+
+#
+while IFS= read -r name; do
+	[[ ${name%%:*} == "${current}" ]] && continue
+	key="${KEYS[${key_count}]}"
+	key_count=$((key_count + 1))
+	if ((key_count < start_point)) ||
+		((key_count > $((max_items + start_point)))); then
+		continue
+	fi
+	key_view=$key_count
+	menu+=("${name}" "${key}" "link-window -ad -s '${name}'")
+done < <(printf '%s\n' "$(tmux list-windows -a -F "#{session_name}:#{window_name}" -f "#{||:#{?window_linked,0,1},#{?#{m:*#{session_name},#{window_linked_sessions_list}},0,1}}")")
+
+#
+menu+=('' 'cancel' 'Escape' '')
+if ((key_view < key_count)); then
+	menu+=('> next windows...' '' "run -b 'window-linker ${key_view}'")
+fi
+
+#
+tmux display-menu -MO \
+	-T "link window (${key_view}/${key_count})" \
+	-x "#{popup_window_status_line_x}" -y "#{popup_window_status_line_y}" \
+	-s "bg=${background},fg=${foreground}" \
+	-S "fg=${border}" \
+	"${menu[@]}"
