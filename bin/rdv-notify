@@ -1,0 +1,170 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2155
+#
+# Rendez-Vous-Notification System
+#
+# TODO: make, notification delays, colors configurable
+# TODO: make visual notification switchable on/off
+
+declare -r DAEMON_LOCK="/tmp/rdv-notify-daemon.lock"
+declare -r DAEMON_PIPE="/tmp/rdv-notify-pipe"
+declare -r STATUS_VISIBLE=$(tmux show -v status)
+declare -r STATUS_LEFT=$(tmux show -gv status-left)
+declare -r STATUS_INTERVAL=$(tmux show -gv status-interval)
+
+source bash_mutex
+
+# shellcheck disable=SC2317
+on_daemon_exit() {
+	tmux set status "${STATUS_VISIBLE}"
+	tmux set -g status-left "${STATUS_LEFT}"
+	tmux set -g status-interval "${STATUS_INTERVAL}"
+	tmux set -gu @rdv-notify-tasks 2>/dev/null
+	rm "${DAEMON_PIPE}" &>/dev/null
+	rm -f "${DAEMON_LOCK}" &>/dev/null
+	trap - INT TERM EXIT
+}
+
+now() { printf "%(%s)T"; }
+
+if [[ -z ${1} ]]; then
+	########################
+	# DAEMON
+	########################
+	# Called without argument -> should run as the notify-daemon
+	if ! mutex "${DAEMON_LOCK}" 2>/dev/null; then exit 0; fi
+	# rename our process
+	printf rdv-notify-daemon >/proc/$$/comm
+	trap on_daemon_exit INT TERM EXIT
+
+	declare -A TASKS=()
+	declare -A DONE_=()
+	declare -A ENDED=()
+	declare -r MAX_START_TICK=5
+
+	# setup status bar
+	tmux set -g status-left '#[fg=cyan]#{@rdv-spinner-state} #[fg=green]#{@rdv-notify-done} #[fg=magenta]#{@rdv-notify-ended} #[fg=yellow]#{@rdv-notify-tasks} '"${STATUS_LEFT}"
+	tmux set -g status-interval "0"
+	tmux set status on
+
+	##
+	# process loop
+	mkfifo ${DAEMON_PIPE} &>/dev/null
+	ticks=0
+	(
+		# pipe tick subprocess
+		printf __rdv-notify-daemon >/proc/$$/comm
+		declare -r SPINNER='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+		declare -r SPINNER_LENGTH=${#SPINNER}
+		while [[ -e ${DAEMON_LOCK} ]]; do
+			sleep 0.2
+			i=$(((i + 1) % SPINNER_LENGTH))
+			tmux set -g @rdv-spinner-state "${SPINNER:i:1}"
+			[[ -p ${DAEMON_PIPE} ]] && echo >${DAEMON_PIPE}
+		done
+	) &
+	while [[ -e ${DAEMON_LOCK} ]]; do
+		stime=$(now)
+		while read -r line; do
+			if [[ -z ${line} ]]; then
+				ticks=$((ticks + 1))
+				break
+			fi
+
+			IFS=' ' read -r -a task <<<"${line}"
+			pid=${task[0]}
+			status=${task[1]}
+			tag=${task[*]:2}
+			case ${status} in
+			-)
+				TASKS[${pid}]=" ${tag}"
+				;;
+			0)
+				unset "TASKS[${pid}]"
+				DONE_[${stime}]=" ${tag}"
+				;;
+			K)
+				unset "TASKS[${pid}]"
+				ENDED[${stime}]=" ${tag}"
+				;;
+			[1-9] | [1-9][0-9] | 1[0-9][0-9] | 2[0-4][0-9] | 25[0-5])
+				unset "TASKS[${pid}]"
+				ENDED[${stime}]=" ${tag}"
+				;;
+			*) : ;;
+			esac
+		done <${DAEMON_PIPE}
+
+		for stamp in "${!DONE_[@]}"; do
+			((stime - stamp > 3)) && unset "DONE_[${stamp}]"
+		done
+
+		for stamp in "${!ENDED[@]}"; do
+			((stime - stamp > 6)) && unset "ENDED[${stamp}]"
+		done
+
+		tmux set -g @rdv-notify-tasks "${TASKS[*]}"
+		tmux set -g @rdv-notify-done "${DONE_[*]}"
+		tmux set -g @rdv-notify-ended "${ENDED[*]}"
+
+		((${#TASKS[@]} == 0)) &&
+			((${#DONE_[@]} == 0)) &&
+			((${#ENDED[@]} == 0)) &&
+			((ticks > MAX_START_TICK)) && break
+	done
+	exit 0
+fi
+
+########################
+# TASK HANDLER
+########################
+# shellcheck disable=SC2317
+on_task_exit() {
+	if [[ ! -v code ]]; then
+		kill "${pid}"
+		echo "${pid} K ${tag}" >"${DAEMON_PIPE}"
+		code=1
+	else
+		echo "${pid} ${code} ${tag}" >"${DAEMON_PIPE}"
+	fi
+	trap - INT TERM EXIT
+	return "${code}"
+}
+trap on_task_exit INT TERM EXIT
+
+##
+# Parameters Validation
+IFS=' ' read -r -a task <<<"${1}"
+tag=${2:? missing <tag> parameter}
+if ! command -v "${task[0]}" &>/dev/null; then
+	echo "invalid command ${task[0]}" >&2
+	exit 1
+fi
+
+##
+# Launch the Daemon
+declare -r MAX_DAEMON_WAIT=3
+tmux run -b rdv-notify
+stime=$(now)
+while (($(now) - stime < MAX_DAEMON_WAIT)) &&
+	[[ ! -p ${DAEMON_PIPE} ]]; do
+	sleep 0.3
+done
+if [[ ! -e ${DAEMON_LOCK} ]] || [[ ! -p ${DAEMON_PIPE} ]]; then
+	tmux display "failed while waiting for rdv-notify daemon!"
+	exit 1
+fi
+
+# rename our process
+task_id="rdv-task-${tag}"
+printf "%s" "${task_id}" >/proc/$$/comm
+
+##
+# Ensure task will be interupted with us
+# see: https://mywiki.wooledge.org/SignalTrap
+"${task[@]}" &
+pid=$!
+echo "${pid} - ${tag}" >${DAEMON_PIPE}
+wait ${pid}
+code=${?}
+exit
