@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+#
+# Session-Chooser
+#
+# TODO: rework picker actions
+# TODO: make an action that will close a session withot save
+
+tmux run "connect-rendez-vous \"$(
+	tmux run 'list-rendez-vous' | fzf --tmux 80%,70%,border-native \
+		--style full \
+		--layout reverse \
+		--margin 2%,1%,4%,1% \
+		--padding 0,0,4%,0 \
+		--input-label ' rendez-vous ' \
+		--border bottom \
+		--border-label ' <C-a> all ● <C-t> tmux ● <C-g> configs ● <C-x> zoxide ● <C-d> close ● <C-f> find ' \
+		--ghost search \
+		--list-label ' results ' \
+		--no-sort --ansi \
+		--scrollbar '▉' \
+		--pointer '▶' \
+		--color 'pointer:magenta,ghost:grey,input-fg:magenta,gutter:black' \
+		--prompt '⚡  ' \
+		--bind 'tab:down,btab:up' \
+		--bind 'ctrl-a:change-prompt(⚡  )+reload(tmux run list-rendez-vous)' \
+		--bind 'ctrl-t:change-prompt(🪟  )+reload(sesh list -t --icons)' \
+		--bind 'ctrl-g:change-prompt(⚙️  )+reload(sesh list -c --icons)' \
+		--bind 'ctrl-x:change-prompt(📁  )+reload(sesh list -z --icons)' \
+		--bind 'ctrl-f:change-prompt(🔎  )+reload(fd -H -d 2 -t d -E .Trash . ~)' \
+		--bind 'ctrl-d:execute(tmux run "close-rendez-vous {2..}")+change-prompt(⚡  )+reload(tmux run list-rendez-vous)' \
+		--preview-window 'right:50%' \
+		--preview 'sesh preview {}'
+)\""
