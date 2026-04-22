@@ -1,0 +1,35 @@
+##
+# Bash file base atomic lock
+#
+
+mutex() {
+	local lock=${1:? missing <lock> parameter}
+	local pid pids
+
+	if command -v fuser &>/dev/null; then
+		exec 9>>"${lock}"
+		{ pids=$(fuser -f "${lock}"); } 2>&- 9>&-
+		for pid in ${pids}; do
+			[[ ${pid} = "${$}" ]] && continue
+			exec 9>&-
+			return 1 # Locked by a pid.
+		done
+	else # fallback method - for macOs
+		if {
+			set -o noclobber
+			! echo $$ >"${lock}_tmp"
+		}; then return 1; fi
+		if ! ln "${lock}_tmp" "${lock}_new"; then
+			rm -f "${lock}_tmp"
+			return 1
+		fi
+
+		rm -f "${lock}_tmp"
+		if ! ln "${lock}_new" "${lock}"; then
+			rm -f "${lock}_new"
+			return 1
+		fi
+		rm -f "${lock}_new"
+	fi
+	return 0
+}
