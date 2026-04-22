@@ -1,0 +1,41 @@
+fail_fast: false
+
+repos:
+  # Conventional commit
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: []
+  # Pre-commit hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      # Generic checks
+      - id: trailing-whitespace
+      - id: check-case-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-added-large-files
+      - id: check-executables-have-shebangs
+      - id: check-symlinks
+      - id: check-vcs-permalinks
+      - id: destroyed-symlinks
+      - id: detect-private-key
+      - id: mixed-line-ending
+      #
+      - id: check-yaml
+        exclude: ^tests/
+      - id: check-json
+        exclude: ^tests/
+      - id: check-xml
+        exclude: ^tests/
+      - id: check-toml
+        exclude: ^tests/
+  # Bash
+  - repo: https://github.com/detailyang/pre-commit-shell
+    rev: 1.0.5
+    hooks:
+      - id: shell-lint
+        args: [--format=json]
