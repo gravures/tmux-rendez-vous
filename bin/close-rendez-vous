@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+#
+# Close-Rendez-Vous command
+#
+
+session=${1}
+if [[ -z ${session} ]]; then exit 0; fi
+# session=${session:2} # strip icon
+
+# test if session is alive
+while IFS= read -r item; do
+	if [[ ${item} == "${session}" ]]; then
+		tmux run "save-rendez-vous ${session}" &&
+			tmux kill-session -t "${session}"
+		exit
+	fi
+done < <(printf '%s\n' "$(sesh list --tmux)")
+
+# check if session is a save item
+while IFS= read -r item; do
+	if [[ ${item} == "${session}" ]]; then
+		lazy-tmux forget --session "${session}"
+		exit
+	fi
+done < <(printf '%s\n' "$(lazy-tmux list | cut -f1)")
