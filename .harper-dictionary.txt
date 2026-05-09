@@ -1,4 +1,14 @@
+CPY001
+D100
+D101
+D103
+RUF027
+S603
+S607
+SubprocessError
+T201
 TPM
 eg
 keybinding
 keybindings
+noqa
