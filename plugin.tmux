@@ -54,87 +54,40 @@
 # └───────────────┴──────────────────────────────────────┘
 #
 # TODO: README.md
-#
-script_dir="$(command cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# FIXME: rendez-vous-notify probably clear tmux-modal status bar Formats
 
-##
-# Requierements
-function require_tmux() {
-	local require version
-	require=(3 6)
-	readarray -td'.' version < <(tmux display -p "#{version}")
+# shellcheck source-path=../tmux-bash-lib/lib
+source tmux::plugin.sh
 
-	[[ ${version[0]} -gt ${require[0]} ]] && return 0
-	# Minor version can be a number or alphanumeric, e.g. 3.3 vs 3.3a
-	[[ ${version[0]} -eq ${require[0]} ]] &&
-		[[ "${version[1]//[!0-9]/}" -ge ${require[1]} ]] &&
-		return 0
+plugin::require_tmux 3 6 || exit 1
+plugin::require_bash 4 4 || exit 1
+plugin::require_command 'sesh' || exit 1
+plugin::require_command 'lazy-tmux' || exit 1
+plugin::require_command 'fzf' || exit 1
 
-	tmux display -d 3000 "!!! rendez-vous plugin require a tmux version >= ${require[*]}"
-	exit 1
-}
+plugin::set_default '@rendez-vous-linker-bg' default
+plugin::set_default '@rendez-vous-linker-fg' default
+plugin::set_default '@rendez-vous-linker-border' default
 
-function require_command() {
-	local cmd=${1:? missing <command> parameter}
+plugin::set_default '@rendez-vous-save-daemon-enabled' off
+plugin::set_default '@rendez-vous-save-daemon-interval' 15
 
-	if
-		! command -v "${cmd}" >/dev/null
-	then
-		tmux display -d 3000 "!!! rendez-vous plugin require '${cmd}' program"
-		exit 1
-	fi
-}
+plugin::set_default '@rendez-vous-save-scrollback' off
+plugin::set_default '@rendez-vous-save-before-hook' off
+plugin::set_default '@rendez-vous-save-after-hook' off
+plugin::set_default '@rendez-vous-restore-before-hook' off
+plugin::set_default '@rendez-vous-restore-after-hook' off
+plugin::set_default '@rendez-vous-connect-after-restore' on
 
-require_tmux
-require_command 'sesh'
-require_command 'lazy-tmux'
-require_command 'fzf'
-
-##
-# Options
-#
-set_option() {
-	local name=${1:? missing <name> parameter}
-	local default=${2:? missing <name> parameter}
-
-	if ! tmux show-options -gv "${name}" >/dev/null; then
-		tmux set-option -g "${name}" "${default}"
-	fi
-}
-set_option '@rendez-vous-linker-bg' default
-set_option '@rendez-vous-linker-fg' default
-set_option '@rendez-vous-linker-border' default
-
-set_option '@rendez-vous-save-daemon-enabled' off
-set_option '@rendez-vous-save-daemon-interval' 15
-
-set_option '@rendez-vous-save-scrollback' off
-set_option '@rendez-vous-save-before-hook' off
-set_option '@rendez-vous-save-after-hook' off
-set_option '@rendez-vous-restore-before-hook' off
-set_option '@rendez-vous-restore-after-hook' off
-
-##
-# adds ./bin to $PATH in tmux session environment
-# this will give tmux direct access to commands in bin/
-bin="${script_dir}/bin"
-updated="${bin}"
-spath=$(tmux show-environment -g PATH)
-spath="${spath##*=}"
-while IFS=: read -d: -r path; do
-	[[ ${path} != "${bin}" ]] && updated+=":${path}"
-done <<<"${spath:+"${spath}:"}"
-tmux set-environment -g PATH "${updated}"
+plugin::add_direnv bin
 
 ##
 # Commands Alias
 # shellcheck disable=SC2102,SC2086
 tmux set-option -s command-alias[700] "cd=attach-session -t . -c"
 tmux set-option -s command-alias[701] "last-session=run 'sesh last'"
+# shellcheck disable=SC2016
 tmux set-option -s command-alias[702] 'sesh-root=run "sesh connect --root $(pwd)"'
-
-# Sesh Integration
-# bind-key -N 'new window' 'n' command-prompt -I "#S" { run sesh window --session "%%"}
 
 ##
 # Save Daemon

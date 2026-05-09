@@ -2,10 +2,10 @@
 #
 # _rdv_daemon
 #
-declare -r DAEMON_LOCK="/tmp/rdv-saver-daemon.lock"
 declare -r INTERVAL=$(($(tmux show -gv '@rendez-vous-save-daemon-interval') * 60))
 
-source bash_mutex
+# shellcheck source-path=../tmux-bash-lib/lib
+source bash::mutex.sh
 
 ##
 # Daemon Status
@@ -14,12 +14,12 @@ if [[ $(tty) != "not a tty" ]]; then
 	exit 0
 fi
 
-if ! mutex ${DAEMON_LOCK} &>/dev/null; then exit 0; fi
+if ! mutex::lock &>/dev/null; then exit 0; fi
 
 # shellcheck disable=SC2317
 on_exit() {
 	[[ ${sleep_pid} ]] && kill "${sleep_pid}"
-	rm -f "${DAEMON_LOCK}" 2>/dev/null
+	mutex::unlock 2>/dev/null
 	trap - INT TERM EXIT
 }
 printf 'rdv-saver-daemon' >/proc/$$/comm
@@ -27,7 +27,7 @@ trap on_exit INT TERM EXIT
 
 ##
 # Main Loop
-while [[ -e ${DAEMON_LOCK} ]]; do
+while mutex::locked; do
 	# begin with a quiet sleep
 	sleep "${INTERVAL}" &
 	sleep_pid=$!

@@ -2,39 +2,29 @@
 #
 # Save-Rendez-Vous command
 #
-declare -r COMMAND_LOCK="/tmp/rdv-session.lock"
-
-source bash_mutex
+# shellcheck source-path=../tmux-bash-lib/lib
+source bash::string.sh
+# shellcheck source-path=../tmux-bash-lib/lib
+source bash::mutex.sh
+declare -r MUTEX_SESSIONS_OP_LOCK=${MUTEX_LOCK_DIR}/sessions_op.lock
 
 # shellcheck disable=SC2317
 on_exit() {
-	rm -f "${COMMAND_LOCK}" 2>/dev/null
+	mutex::unlock "${MUTEX_SESSIONS_OP_LOCK}"
 	trap - INT TERM EXIT
 }
 
 ##
-# lazy-tmux sessions operations lock
-if ! mutex ${COMMAND_LOCK} 2>/dev/null; then exit 0; fi
+# Acquire sessions operations lock
+if ! mutex::lock ${MUTEX_SESSIONS_OP_LOCK} 2>/dev/null; then exit 0; fi
 trap on_exit INT TERM EXIT
 printf save-rdv >/proc/$$/comm
 
 ##
-# Assert lazy-tmux is not operating
-try=0
-while ps -C lazy-tmux &>/dev/null; do
-	if ((try > 2)); then
-		echo "lazy-tmux is already running, couldn't proceed with saving job" >&2
-		exit 1
-	fi
-	try=$((try + 1))
-	sleep 3
-done
-
-##
 # Job start here
 sessions=("${@}")
-readarray -t before_hook < <(tmux show -gv '@rendez-vous-save-before-hook')
-readarray -t after_hook < <(tmux show -gv '@rendez-vous-save-after-hook')
+str::split "$(tmux show -gv '@rendez-vous-save-before-hook')" before_hook ' '
+str::split "$(tmux show -gv '@rendez-vous-save-after-hook')" after_hook ' '
 scrollback=$(tmux show -gv '@rendez-vous-save-scrollback')
 
 [[ "${#sessions[@]}" -eq 0 ]] && sessions=('--all')

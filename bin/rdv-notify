@@ -5,24 +5,28 @@
 #
 # TODO: make, notification delays, colors configurable
 # TODO: make visual notification switchable on/off
+# TODO: Logging task result on file.
 
-declare -r DAEMON_LOCK="/tmp/rdv-notify-daemon.lock"
 declare -r DAEMON_PIPE="/tmp/rdv-notify-pipe"
 declare -r STATUS_VISIBLE=$(tmux show -v status)
 declare -r STATUS_LEFT=$(tmux show -gv status-left)
 declare -r STATUS_INTERVAL=$(tmux show -gv status-interval)
 
-source bash_mutex
+# shellcheck source-path=../tmux-bash-lib/lib
+source bash::mutex.sh
+# shellcheck source-path=../tmux-bash-lib/lib
+source bash::string.sh
 
 # shellcheck disable=SC2317
 on_daemon_exit() {
+	trap - INT TERM EXIT
 	tmux set status "${STATUS_VISIBLE}"
 	tmux set -g status-left "${STATUS_LEFT}"
 	tmux set -g status-interval "${STATUS_INTERVAL}"
 	tmux set -gu @rdv-notify-tasks 2>/dev/null
-	rm "${DAEMON_PIPE}" &>/dev/null
-	rm -f "${DAEMON_LOCK}" &>/dev/null
-	trap - INT TERM EXIT
+	rm "${DAEMON_PIPE}" 2>/dev/null
+	mutex::unlock 2>/dev/null
+	kill "${ticker_pid}" &>/dev/null
 }
 
 now() { printf "%(%s)T"; }
@@ -32,7 +36,7 @@ if [[ -z ${1} ]]; then
 	# DAEMON
 	########################
 	# Called without argument -> should run as the notify-daemon
-	if ! mutex "${DAEMON_LOCK}" 2>/dev/null; then exit 0; fi
+	if ! mutex::lock 2>/dev/null; then exit 0; fi
 	# rename our process
 	printf rdv-notify-daemon >/proc/$$/comm
 	trap on_daemon_exit INT TERM EXIT
@@ -53,17 +57,17 @@ if [[ -z ${1} ]]; then
 	ticks=0
 	(
 		# pipe tick subprocess
-		printf __rdv-notify-daemon >/proc/$$/comm
 		declare -r SPINNER='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
 		declare -r SPINNER_LENGTH=${#SPINNER}
-		while [[ -e ${DAEMON_LOCK} ]]; do
+		while [[ -p ${DAEMON_PIPE} ]]; do
 			sleep 0.2
 			i=$(((i + 1) % SPINNER_LENGTH))
 			tmux set -g @rdv-spinner-state "${SPINNER:i:1}"
 			[[ -p ${DAEMON_PIPE} ]] && echo >${DAEMON_PIPE}
 		done
 	) &
-	while [[ -e ${DAEMON_LOCK} ]]; do
+	ticker_pid=$!
+	while mutex::locked; do
 		stime=$(now)
 		while read -r line; do
 			if [[ -z ${line} ]]; then
@@ -121,7 +125,7 @@ fi
 # shellcheck disable=SC2317
 on_task_exit() {
 	if [[ ! -v code ]]; then
-		kill "${pid}"
+		kill "${pid}" 2>/dev/null
 		echo "${pid} K ${tag}" >"${DAEMON_PIPE}"
 		code=1
 	else
@@ -134,7 +138,7 @@ trap on_task_exit INT TERM EXIT
 
 ##
 # Parameters Validation
-IFS=' ' read -r -a task <<<"${1}"
+str::split "${1}" task ' '
 tag=${2:? missing <tag> parameter}
 if ! command -v "${task[0]}" &>/dev/null; then
 	echo "invalid command ${task[0]}" >&2
@@ -150,8 +154,8 @@ while (($(now) - stime < MAX_DAEMON_WAIT)) &&
 	[[ ! -p ${DAEMON_PIPE} ]]; do
 	sleep 0.3
 done
-if [[ ! -e ${DAEMON_LOCK} ]] || [[ ! -p ${DAEMON_PIPE} ]]; then
-	tmux display "failed while waiting for rdv-notify daemon!"
+if ! mutex::locked || [[ ! -p ${DAEMON_PIPE} ]]; then
+	tmux display "failed waiting for rdv-notify daemon!"
 	exit 1
 fi
 
