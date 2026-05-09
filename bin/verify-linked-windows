@@ -1,0 +1,198 @@
+#!/usr/bin/env python
+# ruff: noqa: CPY001, D100, D103, D101, S603, RUF027, S607
+from __future__ import annotations
+
+import json
+import subprocess as sp
+import sys
+from functools import lru_cache
+from pathlib import Path
+from shutil import which
+from typing import NotRequired, TypedDict
+
+
+class Link(TypedDict):
+    session_name: str
+    window_index: int
+
+
+class Window(TypedDict):
+    index: int
+    name: str
+    layout: str
+    is_active: bool
+    active_pane: int
+    panes: list[object]
+    link: NotRequired[Link]
+
+
+class Session(TypedDict):
+    version: int
+    session_name: str
+    captured_at: str
+    current_window: int
+    current_pane: int
+    windows: list[Window]
+
+
+def tmux(*args: str) -> str:
+    cmd = (which("tmux") or "tmux", *args)
+    cp = sp.run(
+        cmd,
+        shell=False,
+        capture_output=True,
+        check=True,
+        text=True,
+    )
+    return cp.stdout.strip()
+
+
+@lru_cache
+def get_base_index() -> int:
+    try:
+        return int(tmux("show", "-gv", "base-index"))
+    except ValueError:
+        return 0
+
+
+@lru_cache
+def get_linked_source_windows() -> dict[str, tuple[str, int]]:
+    """Returns all sources windows linked in another sessions.
+
+    Returns a dict where keys are unique `tmux window id` and values
+    are two length tuples with (session_name, window_index).
+    """
+    format_ = "#{window_id}\\0#{session_name}\\0#{window_index}"
+    filter_ = "#{?#{m:*#{session_name},#{window_linked_sessions_list}},0,1}"
+    raw = tmux("list-windows", "-a", "-F", format_, "-f", filter_)
+
+    map_: dict[str, tuple[str, int]] = {}
+    for line in raw.splitlines():
+        wid, sname, widx = line.split("\\0")
+        map_[wid] = (sname, int(widx))
+    return map_
+
+
+def get_window_sources(session_name: str) -> dict[int, tuple[str, int] | None]:
+    """Returns a dictionary of window sources for the given session.
+
+    Returns a dict where keys will be `tmux window index` and values will be either
+    a two length tuples with (session_name, window_index) If window is a linked
+    window or None otherwise.
+
+    Note that it's quite different from just requesting the tmux format `window_linked`
+    on a window, which returns `True` either for a source window linked in another
+    session or a target linked window.
+    """
+    src_wins = get_linked_source_windows()
+    base_index = get_base_index()
+    try:
+        win_ids = tmux(
+            "list-windows",
+            "-t",
+            session_name,
+            "-F",
+            "#{window_id}",
+        ).splitlines()
+    except sp.SubprocessError:
+        return {}
+
+    # Note that we attribute win_idx ourself, but there is no reasons for tmux
+    # to list windows unordered.
+    return {win_idx: src_wins.get(win_id) for win_idx, win_id in enumerate(win_ids, base_index)}
+
+
+def get_sessions_directory() -> Path:
+    # TODO: make this portable.
+    return Path(Path.home(), ".local", "share", "lazy-tmux", "sessions")
+
+
+def post_save(session_name: str) -> None:
+    sources = get_window_sources(session_name)
+    if not any(sources.values()):
+        return
+
+    if not (save := (get_sessions_directory() / session_name).with_suffix(".json")).exists():
+        return
+
+    session: Session = json.loads(save.read_text())
+    windows = session.get("windows", [])
+    for window in windows:
+        if src := sources[window["index"]]:
+            window["link"] = {"session_name": src[0], "window_index": src[1]}
+
+    save.write_text(json.dumps(session, indent=2))
+
+
+def post_restore(session_name: str) -> None:
+    if not (save := (get_sessions_directory() / session_name).with_suffix(".json")).exists():
+        return
+
+    session: Session = json.loads(save.read_text())
+    windows = session.get("windows", [])
+    for window in windows:
+        if link := window.get("link"):
+            relink_window(session_name, window["index"], link)
+
+
+def relink_window(session_name: str, window_index: int, link: Link) -> None:
+    if link["session_name"] not in tmux("list-sessions", "-F", "#{session_name}").splitlines():
+        # Load source session if not active
+        connect = tmux("show", "-gv", "@rendez-vous-connect-after-restore")
+        tmux("set", "-g", "@rendez-vous-connect-after-restore", "off")
+        sp.run(
+            ("connect-rendez-vous", link["session_name"]),
+            shell=False,
+            text=True,
+            capture_output=False,
+            check=False,  # FIXME: follow [issue #105](https://github.com/alchemmist/lazy-tmux/issues/105)
+        )
+        tmux("set", "-g", "@rendez-vous-connect-after-restore", connect)
+
+    if (
+        tmux(
+            "display",
+            "-p",
+            "-F",
+            "#{window_linked}",
+            "-t",
+            f"={session_name}:{window_index}",
+        )
+        == "0"
+    ):
+        # kill current window before relinking
+        tmux(
+            "link-window",
+            "-k",
+            "-d",
+            "-s",
+            f"={link['session_name']}:{link['window_index']}",
+            "-t",
+            f"={session_name}:{window_index}",
+        )
+
+
+def main() -> int:
+    ret_code = 0
+    argv = sys.argv[1:]
+
+    try:
+        match argv[0] if argv else None:
+            case "save":
+                for session in argv[1:]:
+                    post_save(session)
+            case "restore":
+                for session in argv[1:]:
+                    post_restore(session)
+            case _:
+                sys.stderr.write("missing command, first argument should be 'save' or 'restore'")
+                ret_code = 1
+    except sp.SubprocessError as err:
+        ret_code = 1
+        sys.stderr.write(f"Unhandled error:\n{err!s}")
+
+    return ret_code
+
+
+if __name__ == "__main__":
+    sys.exit(main())

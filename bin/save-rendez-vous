@@ -46,6 +46,8 @@ if ! rdv-notify "lazy-tmux save ${lazy_tmux_opts[*]}" 'saving sessions'; then
 	exit 1
 fi
 
+rdv-notify "verify-linked-windows save ${sessions[*]}" 'save linked windows'
+
 if command -v "${after_hook[0]}" &>/dev/null; then
 	after_hook+=("${sessions[@]}")
 	rdv-notify "${after_hook[*]}" "${after_hook[0]}"

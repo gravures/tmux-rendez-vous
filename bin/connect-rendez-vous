@@ -2,7 +2,6 @@
 #
 # Create / Connect / Restore tmux sessions
 #
-
 session=${1}
 if [[ -z ${session} ]]; then exit 0; fi
 
@@ -54,6 +53,19 @@ fi
 ##
 # FIXME: follow [issue #105](https://github.com/alchemmist/lazy-tmux/issues/105)
 rdv-notify "lazy-tmux wakeup --session ${session}" 'restoring session'
+
+# FIXME: follow [issue #106](https://github.com/alchemmist/lazy-tmux/issues/106)
+sleep 3
+
+##
+# Handle linked windows in session
+# we need to release the mutex lock to allow
+# the subprocess to call another connect-rendez-vous
+# process if needed.
+mutex::unlock ${MUTEX_SESSIONS_OP_LOCK}
+rdv-notify "verify-linked-windows restore ${session}" 'restore linked windows'
+while mutex::locked ${MUTEX_SESSIONS_OP_LOCK}; do sleep 0.1; done
+mutex::lock ${MUTEX_SESSIONS_OP_LOCK}
 
 # run user after hook
 if command -v "${after_hook[0]}" &>/dev/null; then
