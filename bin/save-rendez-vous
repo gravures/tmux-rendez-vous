@@ -27,20 +27,27 @@ str::split "$(tmux show -gv '@rendez-vous-save-before-hook')" before_hook ' '
 str::split "$(tmux show -gv '@rendez-vous-save-after-hook')" after_hook ' '
 scrollback=$(tmux show -gv '@rendez-vous-save-scrollback')
 
-[[ "${#sessions[@]}" -eq 0 ]] && sessions=('--all')
-[[ ${scrollback} == "on" ]] && sessions+=('--scrollback')
+lazy_tmux_opts=()
+if [[ "${#sessions[@]}" -eq 1 ]]; then
+	lazy_tmux_opts+=('--session' "${sessions[0]}")
+else
+	str::split "$(list-rendez-vous --tmux)" sessions
+	lazy_tmux_opts+=('--all')
+fi
+
+[[ ${scrollback} == "on" ]] && lazy_tmux_opts+=('--scrollback')
 
 if command -v "${before_hook[0]}" &>/dev/null; then
-	before_hook+=("${@}")
+	before_hook+=("${sessions[@}]")
 	rdv-notify "${before_hook[*]}" "${before_hook[0]}"
 fi
 
-if ! rdv-notify "lazy-tmux save ${sessions[*]}" 'saving session'; then
+if ! rdv-notify "lazy-tmux save ${lazy_tmux_opts[*]}" 'saving sessions'; then
 	exit 1
 fi
 
 if command -v "${after_hook[0]}" &>/dev/null; then
-	after_hook+=("${@}")
+	after_hook+=("${sessions[@]}")
 	rdv-notify "${after_hook[*]}" "${after_hook[0]}"
 fi
 
