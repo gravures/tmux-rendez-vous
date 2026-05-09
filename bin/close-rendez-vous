@@ -5,7 +5,6 @@
 
 session=${1}
 if [[ -z ${session} ]]; then exit 0; fi
-# session=${session:2} # strip icon
 
 # test if session is alive
 while IFS= read -r item; do
