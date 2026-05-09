@@ -7,12 +7,51 @@
 #
 # each item has an icon prepend
 #
-sessions=$(sesh list --tmux --icons)
-sleepings=$(comm -23 <(lazy-tmux list | cut -f1 | sort) <(tmux list-sessions -F '#{session_name}' | sort))
-rests=$(sesh list --config --zoxide --icons)
+for opt in "${@}"; do
+	case ${opt} in
+	--icons) icon=--icons ;;
+	--tmux | -t) tmux=true ;;
+	--sleep | -s) sleep=true ;;
+	--config | -c) config=true ;;
+	--zoxide | -z) zoxide=true ;;
+	*) : ;;
+	esac
+done
 
-while IFS= read -r line; do
-	[[ -n ${line} ]] && sessions+="\n ${line}"
-done <<<"${sleepings}"
+if [[ ! -v tmux ]] && [[ ! -v sleep ]] && [[ ! -v config ]] && [[ ! -v zoxide ]]; then
+	tmux=true
+	sleep=true
+	config=true
+	zoxide=true
+fi
 
-echo -e "${sessions}\n${rests}"
+tmp=$(sesh list --tmux)
+
+if [[ -v tmux ]]; then
+	while IFS= read -r line; do
+		[[ -n ${line} ]] && result+="${line}\n"
+	done < <(sesh list --tmux "${icon}")
+fi
+
+# FIXME: regex filter could skip session name (eg: tmux)
+if [[ -v sleep ]]; then
+	[[ ${icon} ]] && ic=" "
+	while IFS= read -r line; do
+		[[ -z ${line} ]] || [[ "\n${tmp}\n" =~ [^.](${line})[^.] ]] && continue
+		result+="${ic}${line}\n"
+	done < <(lazy-tmux list | cut -f1)
+fi
+
+if [[ -v config ]]; then
+	while IFS= read -r line; do
+		[[ -n ${line} ]] && result+="${line}\n"
+	done < <(sesh list --config "${icon}")
+fi
+
+if [[ -v zoxide ]]; then
+	while IFS= read -r line; do
+		[[ -n ${line} ]] && result+="${line}\n"
+	done < <(sesh list --zoxide "${icon}")
+fi
+
+printf '%b' "${result%%}"
