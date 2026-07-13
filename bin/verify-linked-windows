@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # ruff: noqa: CPY001, D100, D103, D101, S603, RUF027, S607
 from __future__ import annotations
 
@@ -145,7 +145,7 @@ def relink_window(session_name: str, window_index: int, link: Link) -> None:
             shell=False,
             text=True,
             capture_output=False,
-            check=False,  # FIXME: follow [issue #105](https://github.com/alchemmist/lazy-tmux/issues/105)
+            check=False,
         )
         tmux("set", "-g", "@rendez-vous-connect-after-restore", connect)
 
