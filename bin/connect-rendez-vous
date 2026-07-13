@@ -50,12 +50,7 @@ if command -v "${before_hook[0]}" &>/dev/null; then
 	rdv-notify "${before_hook[*]}" "${before_hook[0]}"
 fi
 
-##
-# FIXME: follow [issue #105](https://github.com/alchemmist/lazy-tmux/issues/105)
 rdv-notify "lazy-tmux wakeup --session ${session}" 'restoring session'
-
-# FIXME: follow [issue #106](https://github.com/alchemmist/lazy-tmux/issues/106)
-sleep 3
 
 ##
 # Handle linked windows in session
