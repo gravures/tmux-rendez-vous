@@ -2,6 +2,37 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+##  Changelog for release [v0.2.0]
+    
+    https://github.com/gravures/tmux-rendez-vous/compare/473ece3c6bb3cb46bd36d14a21709d4ff344cd8a..v0.2.0
+    2026-07-13
+  
+### Bug Fixes
+
+  - **(save)** options handling in internal tasks - ([4c7cd7b](https://github.com/gravures/tmux-rendez-vous/commit/4c7cd7bcc4ded39be56d287fd56f32cf05ed44a4)) - [@gravures](https://github.com/gravures)
+
+
+### Documentation
+
+  - **update README.md - ([60c48c9](https://github.com/gravures/tmux-rendez-vous/commit/60c48c934e14aeeeeec30e34abd509bec36930be)) - [@gravures](https://github.com/gravures)
+
+### Features
+
+  - **(hooks)** add support for user hooks in session restoration - ([596b58a](https://github.com/gravures/tmux-rendez-vous/commit/596b58aa3f4e8d925daa11fc780ec5b11d03423a)) - [@gravures](https://github.com/gravures)
+
+  - **(linked)** add support for tmux linked windows when saving and restoring sessions - ([8d38915](https://github.com/gravures/tmux-rendez-vous/commit/8d389154afa24502c2ab2cb3c028cff55dbd7291)) - [@gravures](https://github.com/gravures)
+
+
+### Refactoring
+
+  - **(list-rdv)** add option to list-rendez-vous to output icons - ([495929d](https://github.com/gravures/tmux-rendez-vous/commit/495929da8e56dee3c10e157cb47f3464c0d07054)) - [@gravures](https://github.com/gravures)
+
+  - **(plugin)** integrates tmux-bash-lib all over the plugin bash scripts - ([473ece3](https://github.com/gravures/tmux-rendez-vous/commit/473ece3c6bb3cb46bd36d14a21709d4ff344cd8a)) - [@gravures](https://github.com/gravures)
+
+
+
+- - -
+
 ##  Changelog for release [v0.1.0]
     https://github.com/gravures/tmux-rendez-vous/compare/c5907730a9623af249bb9b6194e02f3671c48b87..v0.1.0
     2026-04-22
