@@ -27,10 +27,12 @@ A Tmux [TPM](https://github.com/tmux-plugins/tpm) plugin to manage tmux sessions
 | :------------ | :--------------------------------------- |
 | tmux          | 3.6+ is required                         |
 | bash          | 4.4+ is required                         |
+| python        | 3.x required (for linked windows)        |
 | tmux-bash-lib | tmux plugin with development helpers     |
 | sesh          | for managing sessions                    |
 | lazy-tmux     | for sessions persistence / restoration   |
 | fzf           | for plugin pickers                       |
+| fd            | for directory search in picker           |
 | zoxide        | required by *sesh*                       |
 
 ## Installation
@@ -75,10 +77,34 @@ The picker aggregates four sources into a unified list:
 
 Select any item and press Enter to connect. A live preview (via `sesh preview`) shows the session's directory contents before you commit.
 
+#### Keyboard Shortcuts
+
+| Key | Action |
+| :-- | :----- |
+| `Enter` / `Double-click` | Connect to selected session |
+| `Tab` / `Shift-Tab` | Navigate up/down |
+| `Ctrl-a` | Show all sources (default) |
+| `Ctrl-t` | Show only tmux sessions |
+| `Ctrl-s` | Show only sleeping sessions |
+| `Ctrl-g` | Show only config sessions |
+| `Ctrl-x` | Show only zoxide directories |
+| `Ctrl-d` | Close selected session (saves then kills) |
+| `Ctrl-k` | Kill selected session (permanent delete with confirmation) |
+| `Ctrl-f` | Search directories with `fd` |
+
+The plugin provides two entry points for the picker:
+
+- **`rendez-vous`** — opens the picker in a **tmux popup**, this is the default
+- **`rendez-vous-picker`** — opens the fzf picker **directly in the current pane**
+
 > **Tip:** Bind the picker in your `tmux.conf` to a convenient key for quick access:
 >
 >  `bind-key -n -N "rendez-vous" "M-Enter" run 'rendez-vous'`
 >
+> Or for the fzf only variant:
+>
+>  `bind-key -n -N "rendez-vous picker" "M-Enter" run 'rendez-vous-picker'`
+
 
 ### Save Daemon
 
@@ -163,8 +189,9 @@ or assign to a keybinding for quick access:
 bind-key -n -N 'link window' 'M-Insert' run -b 'window-linker'
 ```
 
-The menu lists all available windows from other sessions. Select one to link it into your current session. The menu is paginated if there are more items than can fit on screen.
-Linked windows are automatically preserved across save and restore cycles.
+The menu lists all available windows from other sessions. Select one to link it into your current session. The menu is paginated — if there are more windows than can fit on screen, a "next windows..." option appears at the bottom to navigate to the next page.
+
+Linked windows are automatically preserved across save and restore cycles. The `verify-linked-windows` script (called automatically during save/restore) persists linked window metadata to the session's JSON file and re-links windows after restoration. If the source session is not active, it will be restored automatically.
 
 Customize the menu appearance with:
 
@@ -184,6 +211,30 @@ The plugin registers the following tmux command aliases for convenience:
 | `last-session` | `run 'sesh last'`                        | Switch to the last session           |
 | `sesh-root`  | `run "sesh connect --root $(pwd)"`          | Connect/create a session at `$PWD`   |
 
+### Close Session
+
+Save and close a session, or permanently delete it:
+
+```bash
+tmux run 'close-rendez-vous <session>'        # save then kill
+tmux run 'close-rendez-vous --kill <session>'  # save, kill, and forget
+```
+
+The `--kill` (`-k`) flag additionally removes the session from `lazy-tmux` storage, permanently deleting it.
+
+### List Sessions
+
+List sessions from various sources:
+
+```bash
+list-rendez-vous            # list all sources
+list-rendez-vous --tmux     # only active tmux sessions
+list-rendez-vous --sleep    # only sleeping (saved) sessions
+list-rendez-vous --config   # only config sessions (sesh.toml)
+list-rendez-vous --zoxide   # only zoxide directories
+list-rendez-vous --icons    # prepend icons to items
+```
+
 ### Configuration
 
 All options are set in your `tmux.conf` with `set -g`:
@@ -197,7 +248,7 @@ All options are set in your `tmux.conf` with `set -g`:
 | `@rendez-vous-save-after-hook` | Command to run after saving | `off` |
 | `@rendez-vous-restore-before-hook` | Command to run before restoring | `off` |
 | `@rendez-vous-restore-after-hook` | Command to run after restoring | `off` |
-| `@rendez-vous-connect-after-restore` | Auto-connect to session after restore | `on` |
+| `@rendez-vous-connect-after-restore` | Auto-connect to session after restore (temporarily disabled by `verify-linked-windows` when restoring source sessions for linked windows) | `on` |
 | `@rendez-vous-linker-bg` | Window-linker menu background color | `default` |
 | `@rendez-vous-linker-fg` | Window-linker menu foreground color | `default` |
 | `@rendez-vous-linker-border` | Window-linker menu border color | `default` |
@@ -215,7 +266,7 @@ You might also like these plugins:
 
 ## Contributing
 
-Contributors are always welcome. Feel free to grab an [issue](https://github.com/gravures/tmux-rendez-vous/issues) to work on or make a suggested improvement. If you wish to contribute, please read the [Contribution Guide](https://github.com/gravures/tmux-rendez-vous/contributing.md) and [Code of Conduct](https://github.com/gravures/tmux-rendez-vous/code_of_conduct.md). <!-- rumdl-disable-line MD013 -->
+Contributors are always welcome. Feel free to grab an [issue](https://github.com/gravures/tmux-rendez-vous/issues) to work on or make a suggested improvement. If you wish to contribute, please read the [Contribution Guide](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md). <!-- rumdl-disable-line MD013 -->
 
 ## Acknowledgments
 
