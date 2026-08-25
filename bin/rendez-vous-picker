@@ -4,6 +4,10 @@
 #
 # TODO: make an action that will close a session without save
 
+# Safe guard against corrupted environment
+_path="$(tmux show-environment -g PATH)"
+export PATH="$PATH:${_path##*=}"
+
 export kill_mesg='Session will be closed and permantly deleted, continue'
 
 # shellcheck disable=SC2016

@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 #
 # Save-Rendez-Vous command
-#
+
+# Safe guard against corrupted environment
+_path="$(tmux show-environment -g PATH)"
+export PATH="$PATH:${_path##*=}"
+
 # shellcheck source-path=../tmux-bash-lib/lib
 source bash::string.sh
 # shellcheck source-path=../tmux-bash-lib/lib
