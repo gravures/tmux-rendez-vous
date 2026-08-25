@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+#
+# Session-Picker
+#
+# TODO: make an action that will close a session without save
+
+export kill_mesg='Session will be closed and permantly deleted, continue'
+
+# shellcheck disable=SC2016
+list-rendez-vous --icons | fzf \
+	--style full \
+	--layout reverse \
+	--margin 2%,1%,4%,1% \
+	--padding 0,0,4%,0 \
+	--input-label ' rendez-vous ' \
+	--border bottom \
+	--border-label ' <^a> all ● <^t> tmux ● <^s> sleeping ● <^g> configs ● <^x> zoxide ● <^d> close ● <^k> kill ● <^f> find' \
+	--ghost search \
+	--list-label ' results ' \
+	--no-sort --ansi \
+	--scrollbar '▉' \
+	--pointer '▶' \
+	--color 'pointer:magenta,ghost:grey,input-fg:magenta,gutter:black' \
+	--prompt '⚡  ' \
+	--bind 'tab:down,btab:up' \
+	--bind 'enter,double-click:become(connect-rendez-vous {2..})' \
+	--bind 'ctrl-a:change-prompt(⚡  )+reload(list-rendez-vous --icons)' \
+	--bind 'ctrl-t:change-prompt(🪟  )+reload(list-rendez-vous -t --icons)' \
+	--bind 'ctrl-s:change-prompt(  )+reload(list-rendez-vous -s --icons)' \
+	--bind 'ctrl-g:change-prompt(⚙️  )+reload(list-rendez-vous -c --icons)' \
+	--bind 'ctrl-x:change-prompt(📁  )+reload(list-rendez-vous -z --icons)' \
+	--bind 'ctrl-d:execute(close-rendez-vous {2..})+change-prompt(⚡  )+reload(list-rendez-vous --icons)' \
+	--bind 'ctrl-k:transform(_fzf-modal confirm "$kill_mesg" "execute{close-rendez-vous --kill \{2..}}+change-prompt{⚡  }+reload{list-rendez-vous --icons}" "execute{:}")' \
+	--bind 'ctrl-f:change-prompt(🔎  )+reload(fd -H -d 2 -t d -E .Trash . ~)' \
+	--preview-window 'right:50%' \
+	--preview 'sesh preview {}'
+
+exit 0
+
+# --border-label ' <C-a> all ● <C-t> tmux ● <C-s> sleeping ● <C-g> configs ● <C-x> zoxide ● <C-d> close ● <C-f> find ● <C-k> kill' \

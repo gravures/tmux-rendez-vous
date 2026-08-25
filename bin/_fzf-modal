@@ -1,0 +1,243 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2317
+# shellcheck disable=SC1091
+
+# Safe guard against corrupted environment
+_path="$(tmux show-environment -g PATH)"
+export PATH="$PATH:${_path##*=}"
+
+# shellcheck source-path=../../tmux-bash-lib/lib
+source tui::device.sh
+
+COLUMNS=
+LINES=
+__BUFFER__=""
+
+MESSAGE=
+WAIT_PID=
+
+function write() {
+	printf '%b' "${@}"
+}
+
+function writeb() {
+	local tmp
+	command printf -v tmp '%b' "${@}"
+	__BUFFER__+=${tmp}
+}
+
+function flush() {
+	echo "${__BUFFER__}" >&"${DEVICE_STDOUT}"
+	__BUFFER__=""
+}
+
+function term_size() {
+	shopt -s checkwinsize
+	(:)
+	# this can fail if bash < 4,
+	# so retrieve the data with external tput
+	COLUMNS=${COLUMNS:-$(tput cols)}
+	LINES=${LINES:-$(tput lines)}
+}
+
+function cursor_pos() {
+	# shellcheck disable=SC2034
+	local -n col_ptr=${1:?missing pointer to store <column>}
+	# shellcheck disable=SC2034
+	local -n row_ptr=${2:?missing pointer to store <row>}
+	# shellcheck disable=SC2034
+	IFS='[;' read -p $'\x1b[6n' -d R -rs _ row_ptr col_ptr _
+}
+
+function teardown() {
+	trap - EXIT INT TERM HUP 2> /dev/null || :
+	trap - WINCH TSTP CONT 2> /dev/null || :
+
+	kill -0 $WAIT_PID && kill -INT $WAIT_PID
+
+	# Hide cursor during cleanup to avoid flicker
+	write '\x1b[?;25l' # hide_cursor to avoid flicker
+	write '\x1b[?1l' # normal cursor keys
+	write '\x1b8' # restore cursor
+	write '\x1b[?7h' # DECAWM on: restore auto-wrap
+	write '\x1b[20h' # LNM (ANSI mode 20) set: restore newline mode
+	write '\x1b[23;0;0t' # pop title
+	write '\x1b[0 q' # reset cursor style to default
+	write '\x1b[?;25h' # show_cursor
+
+	device::teardown
+}
+trap 'teardown' EXIT
+
+function init() {
+	local code
+
+	device::mount || exit 1
+	device::own
+	device::raw_mode
+	term_size
+	trap 'teardown' INT TERM HUP
+
+	write '\x1b7' # save_cursor
+	write '\x1b[22;0;0t' # push title
+	write '\x1b[?1h' # application cursor keys
+	write '\x1b[20l' # LNM (ANSI mode 20) reset for the TUI
+	write '\x1b[?;25l' # hide_cursor
+	write '\x1b[?7l' # DECAWM off: clip at right edge
+	write '\r'
+
+	device::drain
+	# FIXME: all previous command are still in the pipe, stdout is not flushed
+}
+
+function wait_input() {
+	local asw
+	local code=0
+
+	read -rsn1 asw
+	[[ ${asw} != "y" ]] && code=1
+	return ${code}
+}
+
+function draw_ui() {
+	draw_boxed "${MESSAGE} (y/N)?"
+	flush
+}
+
+function on_resize() {
+	# shellcheck disable=SC2317
+	{
+		teardown
+		echo "transform(modal-dialog '$MESSAGE')"
+		exit
+	}
+}
+
+function repeat() {
+	local str=${1:? missing <string> parameter}
+	local count=${2:? missing <count> parameter}
+	local fill
+	# shellcheck disable=SC2183
+	printf -v fill '%*s' "${count}"
+	writeb "${fill// /${str}}"
+}
+
+function draw_boxed() {
+	local text=${1:? missing text parameter}
+	local tw inner inner_txt pad line break_at
+	local -a wrapped
+
+	# Box width constraints
+	local min_w=12
+	local max_w=$((COLUMNS * 80 / 100))
+	((max_w = max_w > 40 ? 40 : (max_w < min_w ? min_w : max_w)))
+
+	# Max inner width, minus 1 space padding on each side
+	inner=$((max_w - 2))
+	inner_txt=$((inner - 2))
+
+	# Wrap text at word boundaries
+	wrapped=()
+	while ((${#text} > inner_txt)); do
+		# Look for last space within inner_txt width
+		break_at=${text:0:inner_txt}
+		break_at=${break_at% *}
+		if ((${#break_at} > 0 && ${#break_at} < inner_txt)); then
+			# Found a word boundary — skip the space
+			wrapped+=("${text:0:${#break_at}}")
+			text=${text:$((${#break_at} + 1))}
+		else
+			# No space found (single long word) — hard cut
+			wrapped+=("${text:0:inner_txt}")
+			text=${text:$inner_txt}
+		fi
+	done
+	((${#text} > 0)) && wrapped+=("$text")
+
+	# Find widest wrapped line to determine box width
+	local max_len=0
+	for line in "${wrapped[@]}"; do
+		((${#line} > max_len)) && max_len=${#line}
+	done
+
+	# Total box width = content + 2 padding + 2 borders, clamped to [min_w, max_w]
+	tw=$((max_len + 4))
+	((tw < min_w)) && tw=${min_w}
+	((tw > max_w)) && tw=${max_w}
+
+	# Horizontal centering offset
+	pad=$(((COLUMNS - tw) / 2))
+	((pad < 0)) && pad=0
+
+	# Border characters
+	local tl='╭' tr='╮' bl='╰' br='╯' h='─' v='│'
+	local inner_w=$((tw - 2))
+
+	# Top border
+	writeb "\x1b[${pad}C" "$tl"
+	repeat "$h" "$inner_w"
+	writeb "$tr\n"
+
+	# Content lines with 1-space horizontal padding
+	for line in "${wrapped[@]}"; do
+		# shellcheck disable=SC2183
+		printf -v right '%*s' "$((inner_w - ${#line} - 1))"
+		writeb "\x1b[${pad}C" "$v" " " "$line" "$right" "$v\n"
+	done
+
+	# Bottom border
+	writeb "\x1b[${pad}C" "$bl"
+	repeat "$h" "$inner_w"
+	writeb "$br\n"
+}
+
+function confirm() {
+	MESSAGE=${1}
+	local yes_cmd=${2}
+	local no_cmd=${3}
+	local code=0
+
+	# setup
+	init
+	trap on_resize WINCH
+	draw_ui
+
+	# input job
+	wait_input &
+	WAIT_PID=$!
+	while kill -0 ${WAIT_PID} 2> /dev/null; do
+		sleep 0.2
+	done
+	wait "${WAIT_PID}" 2> /dev/null # capture exit code of wait_input
+	code=$?
+
+	teardown
+
+	if ((code == 0)); then
+		echo "${yes_cmd}"
+	else
+		echo "${no_cmd}"
+	fi
+
+	exit 0
+}
+
+# Main Entry Point
+function main() {
+	case ${1} in
+		confirm)
+			shift 1
+			local msg=${1:?missing <msg> parameter}
+			local yes_cmd=${2}
+			local no_cmd=${3}
+
+			confirm "$msg" "$yes_cmd" "$no_cmd"
+			;;
+		*)
+			tmux display-message -d 5000 "_fzf-modal-dialog: invalid command '${1}'"
+			exit 1
+			;;
+	esac
+}
+
+main "${@}"
