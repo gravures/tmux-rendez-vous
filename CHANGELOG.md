@@ -2,6 +2,37 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+##  Changelog for release [v1.0.0]
+    
+    https://github.com/gravures/tmux-rendez-vous/compare/67af7773f28c42f2b2e673ba6ee9be56fa40408c..v1.0.0
+    2026-08-25
+  
+### Documentation
+
+  - **(notes)** adds developper notes - ([76794e3](https://github.com/gravures/tmux-rendez-vous/commit/76794e38e2f96a34300279e49b5af54a83cab45e)) - [@gravures](https://github.com/gravures)
+
+  - **(readme)** update README.md - ([212d72f](https://github.com/gravures/tmux-rendez-vous/commit/212d72f22c29d8305b33a9d1a62fbb149dfcb91c)) - [@gravures](https://github.com/gravures)
+
+
+### Features
+
+  - **(close)** allow to delete a stored session from disk - ([61154f2](https://github.com/gravures/tmux-rendez-vous/commit/61154f25fdc4976b3d72c354dd5305ac64dc0552)) - [@gravures](https://github.com/gravures)
+
+  - **(connect)** allow connect-rendez-vous to create a new directory for incoming session - ([3db830b](https://github.com/gravures/tmux-rendez-vous/commit/3db830b94fbf6717e00ada365f3e9dba04d9e602)) - [@gravures](https://github.com/gravures)
+
+  - **(picker)** adds modal confirmation dialog to fzf for destructive actions - ([f59a04d](https://github.com/gravures/tmux-rendez-vous/commit/f59a04d605c5c77e94670b201812355c360fb619)) - [@gravures](https://github.com/gravures)
+
+
+### Fixes
+
+  - **(env)** add safe guard against environment corruption - ([5c420b6](https://github.com/gravures/tmux-rendez-vous/commit/5c420b6c963ced461c317fb318f8de9cbb9f40eb)) - [@gravures](https://github.com/gravures)
+
+  - **(task)** various bug fixes in task notication system - ([8a35c0c](https://github.com/gravures/tmux-rendez-vous/commit/8a35c0ce226432950814268a45609d32db67fba4)) - [@gravures](https://github.com/gravures)
+
+
+
+- - -
+
 ##  Changelog for release [v0.2.0]
     
     https://github.com/gravures/tmux-rendez-vous/compare/473ece3c6bb3cb46bd36d14a21709d4ff344cd8a..v0.2.0
