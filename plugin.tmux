@@ -53,7 +53,11 @@
 # │ fzf           │ plugin pickers                       │
 # └───────────────┴──────────────────────────────────────┘
 #
-# TODO: README.md
+# TODO: feature: save the list of opened client's sessions in daemon
+#       in addition of sessions states, and on tmux starts propose
+#       to restore the last client's state
+# TODO: in picker for long time action make an _fzf-modal monitoring dialog that will not make
+#       the 'screen empty'
 # FIXME: rendez-vous-notify probably clear tmux-modal status bar Formats
 
 # shellcheck source-path=../tmux-bash-lib/lib
@@ -91,7 +95,7 @@ tmux set-option -s command-alias[702] 'sesh-root=run "sesh connect --root $(pwd)
 
 ##
 # Save Daemon
-killall rdv-saver-daemon &>/dev/null
+killall rdv-saver-daemon &> /dev/null
 if [[ $(tmux show -gv '@rendez-vous-save-daemon-enabled') == "on" ]]; then
 	tmux run -b rdv-saver-daemon
 fi
