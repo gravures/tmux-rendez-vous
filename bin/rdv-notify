@@ -7,6 +7,10 @@
 # TODO: make visual notification switchable on/off
 # TODO: Logging task result on file.
 
+# Safe guard against corrupted environment
+_path="$(tmux show-environment -g PATH)"
+export PATH="$PATH:${_path##*=}"
+
 declare -r DAEMON_PIPE="/tmp/rdv-notify-pipe"
 declare -r STATUS_VISIBLE=$(tmux show -v status)
 declare -r STATUS_LEFT=$(tmux show -gv status-left)
@@ -23,10 +27,10 @@ on_daemon_exit() {
 	tmux set status "${STATUS_VISIBLE}"
 	tmux set -g status-left "${STATUS_LEFT}"
 	tmux set -g status-interval "${STATUS_INTERVAL}"
-	tmux set -gu @rdv-notify-tasks 2>/dev/null
-	rm "${DAEMON_PIPE}" 2>/dev/null
-	mutex::unlock 2>/dev/null
-	kill "${ticker_pid}" &>/dev/null
+	tmux set -gu @rdv-notify-tasks 2> /dev/null
+	rm "${DAEMON_PIPE}" 2> /dev/null
+	mutex::unlock 2> /dev/null
+	kill "${ticker_pid}" &> /dev/null
 }
 
 now() { printf "%(%s)T"; }
@@ -36,9 +40,9 @@ if [[ -z ${1} ]]; then
 	# DAEMON
 	########################
 	# Called without argument -> should run as the notify-daemon
-	if ! mutex::lock 2>/dev/null; then exit 0; fi
+	if ! mutex::lock 2> /dev/null; then exit 0; fi
 	# rename our process
-	printf rdv-notify-daemon >/proc/$$/comm
+	printf rdv-notify-daemon > /proc/$$/comm
 	trap on_daemon_exit INT TERM EXIT
 
 	declare -A TASKS=()
@@ -53,7 +57,7 @@ if [[ -z ${1} ]]; then
 
 	##
 	# process loop
-	mkfifo ${DAEMON_PIPE} &>/dev/null
+	mkfifo ${DAEMON_PIPE} &> /dev/null
 	ticks=0
 	(
 		# pipe tick subprocess
@@ -63,7 +67,7 @@ if [[ -z ${1} ]]; then
 			sleep 0.2
 			i=$(((i + 1) % SPINNER_LENGTH))
 			tmux set -g @rdv-spinner-state "${SPINNER:i:1}"
-			[[ -p ${DAEMON_PIPE} ]] && echo >${DAEMON_PIPE}
+			[[ -p ${DAEMON_PIPE} ]] && echo > ${DAEMON_PIPE}
 		done
 	) &
 	ticker_pid=$!
@@ -75,29 +79,29 @@ if [[ -z ${1} ]]; then
 				break
 			fi
 
-			IFS=' ' read -r -a task <<<"${line}"
+			IFS=' ' read -r -a task <<< "${line}"
 			pid=${task[0]}
 			status=${task[1]}
 			tag=${task[*]:2}
 			case ${status} in
-			-)
-				TASKS[${pid}]=" ${tag}"
-				;;
-			0)
-				unset "TASKS[${pid}]"
-				DONE_[${stime}]=" ${tag}"
-				;;
-			K)
-				unset "TASKS[${pid}]"
-				ENDED[${stime}]=" ${tag}"
-				;;
-			[1-9] | [1-9][0-9] | 1[0-9][0-9] | 2[0-4][0-9] | 25[0-5])
-				unset "TASKS[${pid}]"
-				ENDED[${stime}]=" ${tag}"
-				;;
-			*) : ;;
+				-)
+					TASKS[${pid}]=" ${tag}"
+					;;
+				0)
+					unset "TASKS[${pid}]"
+					DONE_[${stime}]=" ${tag}"
+					;;
+				K)
+					unset "TASKS[${pid}]"
+					ENDED[${stime}]=" ${tag}"
+					;;
+				[1-9] | [1-9][0-9] | 1[0-9][0-9] | 2[0-4][0-9] | 25[0-5])
+					unset "TASKS[${pid}]"
+					ENDED[${stime}]=" ${tag}"
+					;;
+				*) : ;;
 			esac
-		done <${DAEMON_PIPE}
+		done < ${DAEMON_PIPE}
 
 		for stamp in "${!DONE_[@]}"; do
 			((stime - stamp > 3)) && unset "DONE_[${stamp}]"
@@ -111,10 +115,10 @@ if [[ -z ${1} ]]; then
 		tmux set -g @rdv-notify-done "${DONE_[*]}"
 		tmux set -g @rdv-notify-ended "${ENDED[*]}"
 
-		((${#TASKS[@]} == 0)) &&
-			((${#DONE_[@]} == 0)) &&
-			((${#ENDED[@]} == 0)) &&
-			((ticks > MAX_START_TICK)) && break
+		((${#TASKS[@]} == 0)) \
+			&& ((${#DONE_[@]} == 0)) \
+			&& ((${#ENDED[@]} == 0)) \
+			&& ((ticks > MAX_START_TICK)) && break
 	done
 	exit 0
 fi
@@ -125,11 +129,11 @@ fi
 # shellcheck disable=SC2317
 on_task_exit() {
 	if [[ ! -v code ]]; then
-		kill "${pid}" 2>/dev/null
-		echo "${pid} K ${tag}" >"${DAEMON_PIPE}"
+		kill "${pid}" 2> /dev/null
+		echo "${pid} K ${tag}" > "${DAEMON_PIPE}"
 		code=1
 	else
-		echo "${pid} ${code} ${tag}" >"${DAEMON_PIPE}"
+		echo "${pid} ${code} ${tag}" > "${DAEMON_PIPE}"
 	fi
 	trap - INT TERM EXIT
 	return "${code}"
@@ -140,7 +144,7 @@ trap on_task_exit INT TERM EXIT
 # Parameters Validation
 str::split "${1}" task ' '
 tag=${2:? missing <tag> parameter}
-if ! command -v "${task[0]}" &>/dev/null; then
+if ! command -v "${task[0]}" &> /dev/null; then
 	echo "invalid command ${task[0]}" >&2
 	exit 1
 fi
@@ -150,8 +154,8 @@ fi
 declare -r MAX_DAEMON_WAIT=3
 tmux run -b rdv-notify
 stime=$(now)
-while (($(now) - stime < MAX_DAEMON_WAIT)) &&
-	[[ ! -p ${DAEMON_PIPE} ]]; do
+while (($(now) - stime < MAX_DAEMON_WAIT)) \
+	&& [[ ! -p ${DAEMON_PIPE} ]]; do
 	sleep 0.3
 done
 if ! mutex::locked || [[ ! -p ${DAEMON_PIPE} ]]; then
@@ -161,14 +165,14 @@ fi
 
 # rename our process
 task_id="rdv-task-${tag}"
-printf "%s" "${task_id}" >/proc/$$/comm
+printf "%s" "${task_id}" > /proc/$$/comm
 
 ##
 # Ensure task will be interupted with us
 # see: https://mywiki.wooledge.org/SignalTrap
 "${task[@]}" &
 pid=$!
-echo "${pid} - ${tag}" >${DAEMON_PIPE}
+echo "${pid} - ${tag}" > ${DAEMON_PIPE}
 wait ${pid}
 code=${?}
 exit
