@@ -1,0 +1,34 @@
+{
+  "issues": [],
+  "warnings": [
+    "Node 'file:bin/window-linker' has no edges (orphan)",
+    "Node 'file:changelog.tera' has no edges (orphan)",
+    "Node 'file:.ua/.understandignore' has no edges (orphan)"
+  ],
+  "stats": {
+    "totalNodes": 31,
+    "totalEdges": 36,
+    "totalLayers": 6,
+    "tourSteps": 7,
+    "nodeTypes": {
+      "document": 7,
+      "config": 9,
+      "file": 15
+    },
+    "edgeTypes": {
+      "configures": 3,
+      "generates": 1,
+      "complements": 2,
+      "uses": 1,
+      "references": 6,
+      "documents": 1,
+      "relates-to": 2,
+      "feeds-into": 1,
+      "describes": 2,
+      "related": 1,
+      "starts": 1,
+      "exposes": 1,
+      "calls": 14
+    }
+  }
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "order": 1,
+    "title": "Project Overview",
+    "description": "Start with the README to understand tmux-rendez-vous: a TPM plugin that unifies sesh (session management) and lazy-tmux (persistence) behind a tmux popup picker.",
+    "nodeIds": ["document:README.md"]
+  },
+  {
+    "order": 2,
+    "title": "Plugin Entry Point",
+    "description": "plugin.tmux bootstraps the plugin: sources tmux-bash-lib, validates dependencies (tmux 3.6+, bash 4.4+, sesh, lazy-tmux, fzf), sets default options, and conditionally starts the save daemon.",
+    "nodeIds": ["file:plugin.tmux"]
+  },
+  {
+    "order": 3,
+    "title": "The Picker Flow",
+    "description": "rendez-vous is a thin wrapper that opens a tmux popup running rendez-vous-picker — the interactive fzf-based session browser that aggregates 4 sources (active sessions, sleeping sessions, configs, zoxide dirs).",
+    "nodeIds": ["file:bin/rendez-vous", "file:bin/rendez-vous-picker"]
+  },
+  {
+    "order": 4,
+    "title": "Session Lifecycle",
+    "description": "connect-rendez-vous handles session restoration with mutex locking, hooks, and linked windows. close-rendez-vous saves then kills sessions. list-rendez-vous queries all session sources via sesh and lazy-tmux.",
+    "nodeIds": ["file:bin/connect-rendez-vous", "file:bin/close-rendez-vous", "file:bin/list-rendez-vous"]
+  },
+  {
+    "order": 5,
+    "title": "Persistence & Save Daemon",
+    "description": "save-rendez-vous persists session state via lazy-tmux with before/after hooks. rdv-saver-daemon runs periodic saves in the background using a configurable interval.",
+    "nodeIds": ["file:bin/save-rendez-vous", "file:bin/rdv-saver-daemon"]
+  },
+  {
+    "order": 6,
+    "title": "Window Linking & Notifications",
+    "description": "verify-linked-windows (Python) manages cross-session window linking. window-linker displays a menu of linkable windows. rdv-notify provides a daemon+task notification system using a named pipe and tmux status bar.",
+    "nodeIds": ["file:bin/verify-linked-windows", "file:bin/window-linker", "file:bin/rdv-notify"]
+  },
+  {
+    "order": 7,
+    "title": "Configuration & Tooling",
+    "description": "Project tooling: pre-commit hooks for conventional commits and linting, cocogitto for changelog generation, ruff/pyright/rumdl for Python and markdown linting, and shellcheck for bash validation.",
+    "nodeIds": ["config:.pre-commit-config.yaml", "config:cog.toml", "config:ruff.toml", "config:pyrightconfig.json"]
+  }
+]

@@ -1,0 +1,266 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "louvain",
+  "totalFiles": 31,
+  "totalBatches": 3,
+  "exportsByPath": {
+    ".shellcheckrc": [],
+    ".ua/.understandignore": [],
+    "bin/_fzf-modal": [],
+    "bin/close-rendez-vous": [],
+    "bin/connect-rendez-vous": [],
+    "bin/list-rendez-vous": [],
+    "bin/rdv-notify": [],
+    "bin/rdv-saver-daemon": [],
+    "bin/rendez-vous": [],
+    "bin/rendez-vous-picker": [],
+    "bin/save-rendez-vous": [],
+    "bin/verify-linked-windows": [],
+    "bin/window-linker": [],
+    "changelog.tera": [],
+    "plugin.tmux": []
+  },
+  "batches": [
+    {
+      "batchIndex": 1,
+      "files": [
+        {
+          "path": ".harper-dictionary.txt",
+          "language": "txt",
+          "sizeLines": 14,
+          "fileCategory": "docs"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "language": "yaml",
+          "sizeLines": 41,
+          "fileCategory": "config"
+        },
+        {
+          "path": "AGENTS.md",
+          "language": "markdown",
+          "sizeLines": 53,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "CHANGELOG.md",
+          "language": "markdown",
+          "sizeLines": 57,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "CODE_OF_CONDUCT.md",
+          "language": "markdown",
+          "sizeLines": 132,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "language": "markdown",
+          "sizeLines": 52,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "README.md",
+          "language": "markdown",
+          "sizeLines": 228,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "cog.toml",
+          "language": "toml",
+          "sizeLines": 42,
+          "fileCategory": "config"
+        },
+        {
+          "path": "pyrightconfig.json",
+          "language": "json",
+          "sizeLines": 122,
+          "fileCategory": "config"
+        },
+        {
+          "path": "ruff.toml",
+          "language": "toml",
+          "sizeLines": 73,
+          "fileCategory": "config"
+        },
+        {
+          "path": "rumdl.toml",
+          "language": "toml",
+          "sizeLines": 3,
+          "fileCategory": "config"
+        }
+      ],
+      "batchImportData": {
+        ".harper-dictionary.txt": [],
+        ".pre-commit-config.yaml": [],
+        "AGENTS.md": [],
+        "CHANGELOG.md": [],
+        "CODE_OF_CONDUCT.md": [],
+        "CONTRIBUTING.md": [],
+        "README.md": [],
+        "cog.toml": [],
+        "pyrightconfig.json": [],
+        "ruff.toml": [],
+        "rumdl.toml": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 2,
+      "files": [
+        {
+          "path": ".ua/config.json",
+          "language": "json",
+          "sizeLines": 1,
+          "fileCategory": "config"
+        },
+        {
+          "path": ".ua/fingerprints.json",
+          "language": "json",
+          "sizeLines": 176,
+          "fileCategory": "config"
+        },
+        {
+          "path": ".ua/knowledge-graph.json",
+          "language": "json",
+          "sizeLines": 1235,
+          "fileCategory": "config"
+        },
+        {
+          "path": ".ua/meta.json",
+          "language": "json",
+          "sizeLines": 6,
+          "fileCategory": "config"
+        }
+      ],
+      "batchImportData": {
+        ".ua/config.json": [],
+        ".ua/fingerprints.json": [],
+        ".ua/knowledge-graph.json": [],
+        ".ua/meta.json": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 3,
+      "files": [
+        {
+          "path": ".shellcheckrc",
+          "language": "unknown",
+          "sizeLines": 3,
+          "fileCategory": "code"
+        },
+        {
+          "path": ".ua/.understandignore",
+          "language": "unknown",
+          "sizeLines": 74,
+          "fileCategory": "code"
+        },
+        {
+          "path": "bin/_fzf-modal",
+          "language": "unknown",
+          "sizeLines": 239,
+          "fileCategory": "code"
+        },
+        {
+          "path": "bin/close-rendez-vous",
+          "language": "unknown",
+          "sizeLines": 47,
+          "fileCategory": "code"
+        },
+        {
+          "path": "bin/connect-rendez-vous",
+          "language": "unknown",
+          "sizeLines": 100,
+          "fileCategory": "code"
+        },
+        {
+          "path": "bin/list-rendez-vous",
+          "language": "unknown",
+          "sizeLines": 57,
+          "fileCategory": "code"
+        },
+        {
+          "path": "bin/rdv-notify",
+          "language": "unknown",
+          "sizeLines": 178,
+          "fileCategory": "code"
+        },
+        {
+          "path": "bin/rdv-saver-daemon",
+          "language": "unknown",
+          "sizeLines": 51,
+          "fileCategory": "code"
+        },
+        {
+          "path": "bin/rendez-vous",
+          "language": "unknown",
+          "sizeLines": 8,
+          "fileCategory": "code"
+        },
+        {
+          "path": "bin/rendez-vous-picker",
+          "language": "unknown",
+          "sizeLines": 44,
+          "fileCategory": "code"
+        },
+        {
+          "path": "bin/save-rendez-vous",
+          "language": "unknown",
+          "sizeLines": 60,
+          "fileCategory": "code"
+        },
+        {
+          "path": "bin/verify-linked-windows",
+          "language": "unknown",
+          "sizeLines": 198,
+          "fileCategory": "code"
+        },
+        {
+          "path": "bin/window-linker",
+          "language": "unknown",
+          "sizeLines": 45,
+          "fileCategory": "code"
+        },
+        {
+          "path": "changelog.tera",
+          "language": "tera",
+          "sizeLines": 80,
+          "fileCategory": "code"
+        },
+        {
+          "path": "notes/popup-with-scratch-session.md",
+          "language": "markdown",
+          "sizeLines": 10,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "plugin.tmux",
+          "language": "tmux",
+          "sizeLines": 100,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        ".shellcheckrc": [],
+        ".ua/.understandignore": [],
+        "bin/_fzf-modal": [],
+        "bin/close-rendez-vous": [],
+        "bin/connect-rendez-vous": [],
+        "bin/list-rendez-vous": [],
+        "bin/rdv-notify": [],
+        "bin/rdv-saver-daemon": [],
+        "bin/rendez-vous": [],
+        "bin/rendez-vous-picker": [],
+        "bin/save-rendez-vous": [],
+        "bin/verify-linked-windows": [],
+        "bin/window-linker": [],
+        "changelog.tera": [],
+        "notes/popup-with-scratch-session.md": [],
+        "plugin.tmux": []
+      },
+      "neighborMap": {}
+    }
+  ]
+}

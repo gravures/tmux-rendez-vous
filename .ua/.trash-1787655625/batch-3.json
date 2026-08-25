@@ -1,0 +1,258 @@
+{
+  "nodes": [
+    {
+      "id": "file:plugin.tmux",
+      "type": "file",
+      "name": "plugin.tmux",
+      "filePath": "plugin.tmux",
+      "summary": "TPM plugin entry point. Sources tmux::plugin.sh, validates tmux 3.6+/bash 4.4+/sesh/lazy-tmux/fzf, sets default options, defines command aliases, and conditionally starts rdv-saver-daemon.",
+      "tags": ["entrypoint", "tmux", "bash", "plugin", "initialization"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:bin/rendez-vous",
+      "type": "file",
+      "name": "rendez-vous",
+      "filePath": "bin/rendez-vous",
+      "summary": "Thin wrapper that opens a tmux popup (80%×70%) running rendez-vous-picker for session selection.",
+      "tags": ["entrypoint", "tmux", "bash", "popup"],
+      "complexity": "low"
+    },
+    {
+      "id": "file:bin/rendez-vous-picker",
+      "type": "file",
+      "name": "rendez-vous-picker",
+      "filePath": "bin/rendez-vous-picker",
+      "summary": "Interactive fzf-based session picker. Lists sessions via list-rendez-vous, connects via connect-rendez-vous, closes via close-rendez-vous, kills with _fzf-modal confirmation, and previews with sesh preview.",
+      "tags": ["tui", "fzf", "bash", "session-picker", "interactive"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:bin/connect-rendez-vous",
+      "type": "file",
+      "name": "connect-rendez-vous",
+      "filePath": "bin/connect-rendez-vous",
+      "summary": "Connects to or restores a tmux session. Checks sleeping sessions via list-rendez-vous, acquires mutex lock, runs before/after hooks via rdv-notify, handles linked windows via verify-linked-windows, and optionally connects via sesh.",
+      "tags": ["session-management", "bash", "mutex", "restoration", "hooks"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:bin/close-rendez-vous",
+      "type": "file",
+      "name": "close-rendez-vous",
+      "filePath": "bin/close-rendez-vous",
+      "summary": "Closes a tmux session. If active, saves via save-rendez-vous then kills the session. If sleeping, removes from lazy-tmux persistence via lazy-tmux forget.",
+      "tags": ["session-management", "bash", "cleanup"],
+      "complexity": "low"
+    },
+    {
+      "id": "file:bin/save-rendez-vous",
+      "type": "file",
+      "name": "save-rendez-vous",
+      "filePath": "bin/save-rendez-vous",
+      "summary": "Saves tmux session state. Acquires mutex, runs before/after hooks via rdv-notify, calls lazy-tmux save (single or all sessions), saves linked windows via verify-linked-windows, supports scrollback option.",
+      "tags": ["session-management", "bash", "persistence", "mutex", "hooks"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:bin/list-rendez-vous",
+      "type": "file",
+      "name": "list-rendez-vous",
+      "filePath": "bin/list-rendez-vous",
+      "summary": "Lists available sessions from multiple sources: active tmux sessions (sesh --tmux), sleeping sessions (lazy-tmux list), configs (sesh --config), and zoxide directories (sesh --zoxide). Supports filter flags and icon mode.",
+      "tags": ["session-management", "bash", "listing", "sesh", "lazy-tmux"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:bin/rdv-notify",
+      "type": "file",
+      "name": "rdv-notify",
+      "filePath": "bin/rdv-notify",
+      "summary": "Notification daemon and task handler. Daemon mode: manages a spinner, tracks task status (pending/done/failed), updates tmux status bar. Task handler mode: launches a command, reports status to daemon pipe. Uses mutex for singleton daemon.",
+      "tags": ["daemon", "bash", "notification", "status-bar", "mutex", "pipe"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:bin/rdv-saver-daemon",
+      "type": "file",
+      "name": "rdv-saver-daemon",
+      "filePath": "bin/rdv-saver-daemon",
+      "summary": "Periodic save daemon. Sleeps for configurable interval (from @rendez-vous-save-daemon-interval), then runs save-rendez-vous. Uses mutex for singleton enforcement.",
+      "tags": ["daemon", "bash", "periodic", "persistence", "mutex"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:bin/_fzf-modal",
+      "type": "file",
+      "name": "_fzf-modal",
+      "filePath": "bin/_fzf-modal",
+      "summary": "Terminal UI modal dialog for confirmations. Manages raw terminal mode, cursor positioning, box drawing with word-wrapping, and y/N input handling. Used by rendez-vous-picker for kill confirmation.",
+      "tags": ["tui", "bash", "modal", "terminal", "confirmation"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:bin/verify-linked-windows",
+      "type": "file",
+      "name": "verify-linked-windows",
+      "filePath": "bin/verify-linked-windows",
+      "summary": "Python script for managing tmux window linking across sessions. Save mode: records linked window sources in lazy-tmux JSON files. Restore mode: relinks windows, loading source sessions via connect-rendez-vous if needed.",
+      "tags": ["python", "session-management", "window-linking", "persistence"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:bin/window-linker",
+      "type": "file",
+      "name": "window-linker",
+      "filePath": "bin/window-linker",
+      "summary": "Displays a tmux menu listing unlinked windows from other sessions that can be linked into the current session. Supports pagination and customizable colors.",
+      "tags": ["tmux", "bash", "menu", "window-linking", "interactive"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:changelog.tera",
+      "type": "file",
+      "name": "changelog.tera",
+      "filePath": "changelog.tera",
+      "summary": "Tera template for generating changelogs from git-commitguru data. Handles version tags, package updates, and scoped/unscoped commit grouping.",
+      "tags": ["template", "tera", "documentation", "changelog"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:notes/popup-with-scratch-session.md",
+      "type": "document",
+      "name": "popup-with-scratch-session.md",
+      "filePath": "notes/popup-with-scratch-session.md",
+      "summary": "Documentation snippet showing how to launch rendez-vous-picker inside a tmux popup via a temporary scratch session.",
+      "tags": ["documentation", "tmux", "popup", "snippet"],
+      "complexity": "low"
+    },
+    {
+      "id": "file:.shellcheckrc",
+      "type": "file",
+      "name": ".shellcheckrc",
+      "filePath": ".shellcheckrc",
+      "summary": "ShellCheck configuration enabling external sources and setting source path to tmux-bash-lib/lib.",
+      "tags": ["config", "linting", "shellcheck"],
+      "complexity": "low"
+    },
+    {
+      "id": "file:.ua/.understandignore",
+      "type": "file",
+      "name": ".understandignore",
+      "filePath": ".ua/.understandignore",
+      "summary": "Understand-Anything ignore patterns file. Lists commented-out exclusion patterns for various languages (Python, JS, Go, Rust, etc.).",
+      "tags": ["config", "ua", "ignore-patterns"],
+      "complexity": "low"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:plugin.tmux",
+      "target": "file:bin/rdv-saver-daemon",
+      "type": "starts",
+      "label": "conditionally starts save daemon"
+    },
+    {
+      "source": "file:plugin.tmux",
+      "target": "file:bin/rendez-vous-picker",
+      "type": "exposes",
+      "label": "adds bin/ to PATH via plugin::add_direnv"
+    },
+    {
+      "source": "file:bin/rendez-vous",
+      "target": "file:bin/rendez-vous-picker",
+      "type": "calls",
+      "label": "launches picker in tmux popup"
+    },
+    {
+      "source": "file:bin/rendez-vous-picker",
+      "target": "file:bin/list-rendez-vous",
+      "type": "calls",
+      "label": "fzf reload commands list sessions"
+    },
+    {
+      "source": "file:bin/rendez-vous-picker",
+      "target": "file:bin/connect-rendez-vous",
+      "type": "calls",
+      "label": "fzf enter/double-click connects session"
+    },
+    {
+      "source": "file:bin/rendez-vous-picker",
+      "target": "file:bin/close-rendez-vous",
+      "type": "calls",
+      "label": "fzf ctrl-d closes session"
+    },
+    {
+      "source": "file:bin/rendez-vous-picker",
+      "target": "file:bin/_fzf-modal",
+      "type": "calls",
+      "label": "fzf ctrl-k kill confirmation dialog"
+    },
+    {
+      "source": "file:bin/connect-rendez-vous",
+      "target": "file:bin/list-rendez-vous",
+      "type": "calls",
+      "label": "lists sleeping sessions to check restoration"
+    },
+    {
+      "source": "file:bin/connect-rendez-vous",
+      "target": "file:bin/rdv-notify",
+      "type": "calls",
+      "label": "runs before/after hooks and linked window restore"
+    },
+    {
+      "source": "file:bin/connect-rendez-vous",
+      "target": "file:bin/verify-linked-windows",
+      "type": "calls",
+      "label": "restores linked windows"
+    },
+    {
+      "source": "file:bin/close-rendez-vous",
+      "target": "file:bin/save-rendez-vous",
+      "type": "calls",
+      "label": "saves session before killing"
+    },
+    {
+      "source": "file:bin/save-rendez-vous",
+      "target": "file:bin/rdv-notify",
+      "type": "calls",
+      "label": "runs before/after hooks and save notifications"
+    },
+    {
+      "source": "file:bin/save-rendez-vous",
+      "target": "file:bin/verify-linked-windows",
+      "type": "calls",
+      "label": "saves linked window info"
+    },
+    {
+      "source": "file:bin/save-rendez-vous",
+      "target": "file:bin/list-rendez-vous",
+      "type": "calls",
+      "label": "gets all tmux sessions when saving all"
+    },
+    {
+      "source": "file:bin/rdv-saver-daemon",
+      "target": "file:bin/save-rendez-vous",
+      "type": "calls",
+      "label": "periodically triggers save"
+    },
+    {
+      "source": "file:bin/verify-linked-windows",
+      "target": "file:bin/connect-rendez-vous",
+      "type": "calls",
+      "label": "loads source session during restore if not active"
+    },
+    {
+      "source": "file:notes/popup-with-scratch-session.md",
+      "target": "file:bin/rendez-vous-picker",
+      "type": "references",
+      "label": "documents picker usage in popup"
+    },
+    {
+      "source": "file:plugin.tmux",
+      "target": "file:.shellcheckrc",
+      "type": "configures",
+      "label": "shellcheck source-path points to tmux-bash-lib"
+    }
+  ]
+}

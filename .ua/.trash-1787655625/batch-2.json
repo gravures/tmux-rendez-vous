@@ -1,0 +1,73 @@
+{
+  "nodes": [
+    {
+      "id": "config:.ua/config.json",
+      "type": "config",
+      "name": "config.json",
+      "filePath": ".ua/config.json",
+      "summary": "OpenCode analysis configuration specifying output language as English.",
+      "tags": ["config", "opencode", "language", "settings"]
+    },
+    {
+      "id": "config:.ua/fingerprints.json",
+      "type": "config",
+      "name": "fingerprints.json",
+      "filePath": ".ua/fingerprints.json",
+      "summary": "Content fingerprints (SHA-256 hashes) and structural analysis metadata for all 19 project source files. Tracks file versions, line counts, functions, classes, imports, and exports to enable incremental re-analysis.",
+      "tags": ["config", "opencode", "fingerprint", "hashing", "incremental", "metadata"]
+    },
+    {
+      "id": "config:.ua/knowledge-graph.json",
+      "type": "config",
+      "name": "knowledge-graph.json",
+      "filePath": ".ua/knowledge-graph.json",
+      "summary": "Full knowledge graph of tmux-rendez-vous containing 70 nodes across 6 layers (Plugin Entry, Core Scripts, Configuration, Documentation, Analysis Output, Analysis Tooling), 72 edges with typed relationships, and a 7-step guided tour of the architecture.",
+      "tags": ["config", "opencode", "knowledge-graph", "architecture", "layers", "tour"]
+    },
+    {
+      "id": "config:.ua/meta.json",
+      "type": "config",
+      "name": "meta.json",
+      "filePath": ".ua/meta.json",
+      "summary": "Analysis metadata: last analyzed 2026-08-02, git commit 999ce9f, version 1.0.0, 39 files analyzed.",
+      "tags": ["config", "opencode", "metadata", "analysis-history"]
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:.ua/fingerprints.json",
+      "target": "config:.ua/knowledge-graph.json",
+      "type": "feeds-into",
+      "weight": 0.8,
+      "label": "file hashes drive incremental graph rebuilds"
+    },
+    {
+      "source": "config:.ua/meta.json",
+      "target": "config:.ua/knowledge-graph.json",
+      "type": "describes",
+      "weight": 0.7,
+      "label": "tracks analysis state of the knowledge graph"
+    },
+    {
+      "source": "config:.ua/meta.json",
+      "target": "config:.ua/fingerprints.json",
+      "type": "describes",
+      "weight": 0.6,
+      "label": "tracks analysis state of fingerprint data"
+    },
+    {
+      "source": "config:.ua/config.json",
+      "target": "config:.ua/knowledge-graph.json",
+      "type": "configures",
+      "weight": 0.5,
+      "label": "sets output language for graph reports"
+    },
+    {
+      "source": "config:.ua/fingerprints.json",
+      "target": "config:.ua/meta.json",
+      "type": "related",
+      "weight": 0.4,
+      "label": "both derived from same analysis run"
+    }
+  ]
+}

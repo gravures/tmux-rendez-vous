@@ -1,0 +1,72 @@
+[
+  {
+    "id": "layer:plugin-entry",
+    "name": "Plugin Entry",
+    "description": "TPM plugin entry point and main command wrapper. plugin.tmux bootstraps the plugin, validates dependencies, and sets up the environment. rendez-vous is the user-facing popup launcher.",
+    "nodeIds": ["file:plugin.tmux", "file:bin/rendez-vous"]
+  },
+  {
+    "id": "layer:core-scripts",
+    "name": "Core Scripts",
+    "description": "Executable bash scripts that implement session management, persistence, window linking, notifications, and the interactive picker. These are the functional core of the plugin.",
+    "nodeIds": [
+      "file:bin/rendez-vous-picker",
+      "file:bin/connect-rendez-vous",
+      "file:bin/close-rendez-vous",
+      "file:bin/save-rendez-vous",
+      "file:bin/list-rendez-vous",
+      "file:bin/rdv-notify",
+      "file:bin/rdv-saver-daemon",
+      "file:bin/verify-linked-windows",
+      "file:bin/window-linker",
+      "file:bin/_fzf-modal"
+    ]
+  },
+  {
+    "id": "layer:configuration",
+    "name": "Configuration",
+    "description": "Project configuration files for linting, type-checking, commit conventions, and pre-commit hooks.",
+    "nodeIds": [
+      "config:.pre-commit-config.yaml",
+      "config:cog.toml",
+      "config:pyrightconfig.json",
+      "config:ruff.toml",
+      "config:rumdl.toml",
+      "file:.shellcheckrc"
+    ]
+  },
+  {
+    "id": "layer:documentation",
+    "name": "Documentation",
+    "description": "Project documentation including README, contribution guidelines, code of conduct, changelog, and agent guidelines.",
+    "nodeIds": [
+      "document:README.md",
+      "document:AGENTS.md",
+      "document:CHANGELOG.md",
+      "document:CODE_OF_CONDUCT.md",
+      "document:CONTRIBUTING.md",
+      "document:.harper-dictionary.txt",
+      "file:notes/popup-with-scratch-session.md"
+    ]
+  },
+  {
+    "id": "layer:analysis-output",
+    "name": "Analysis Output",
+    "description": "Understand-Anything analysis artifacts — knowledge graph, fingerprints, metadata, and configuration.",
+    "nodeIds": [
+      "config:.ua/config.json",
+      "config:.ua/fingerprints.json",
+      "config:.ua/knowledge-graph.json",
+      "config:.ua/meta.json",
+      "file:.ua/.understandignore"
+    ]
+  },
+  {
+    "id": "layer:tooling",
+    "name": "Tooling & Templates",
+    "description": "Build tooling templates and miscellaneous files used for changelog generation and configuration.",
+    "nodeIds": [
+      "file:changelog.tera"
+    ]
+  }
+]
