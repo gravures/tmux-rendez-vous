@@ -6,6 +6,7 @@
 # TODO: make, notification delays, colors configurable
 # TODO: make visual notification switchable on/off
 # TODO: Logging task result on file.
+# FIXME: rendez-vous-notify probably clear tmux-modal status bar Formats
 
 # Safe guard against corrupted environment
 _path="$(tmux show-environment -g PATH)"
@@ -128,15 +129,23 @@ fi
 ########################
 # shellcheck disable=SC2317
 on_task_exit() {
-	if [[ ! -v code ]]; then
-		kill "${pid}" 2> /dev/null
-		echo "${pid} K ${tag}" > "${DAEMON_PIPE}"
-		code=1
-	else
-		echo "${pid} ${code} ${tag}" > "${DAEMON_PIPE}"
+	local exit_code=$?
+
+	# If we still have a task running, ensure it's cleaned up
+	if ((pid > 0)); then
+		if kill -0 "$pid" 2> /dev/null; then
+			kill -TERM "$pid" 2> /dev/null
+			sleep 1
+			kill -9 "$pid" 2> /dev/null
+			echo "${pid} K ${tag}" > "${DAEMON_PIPE}"
+			code=137 # SIGKILL
+		else
+			echo "${pid} ${code:-${exit_code}} ${tag}" > "${DAEMON_PIPE}"
+		fi
 	fi
+
 	trap - INT TERM EXIT
-	return "${code}"
+	return "${code:-${exit_code}}"
 }
 trap on_task_exit INT TERM EXIT
 
@@ -163,16 +172,47 @@ if ! mutex::locked || [[ ! -p ${DAEMON_PIPE} ]]; then
 	exit 1
 fi
 
+function is_task_healthy() {
+	local pid=$1
+	local state=$(ps -o state= -p "$pid" 2> /dev/null)
+	local code
+
+	case "$state" in
+		S* | R*) code=0 ;; # Sleeping or Running - healthy
+		Z* | D* | T*) code=1 ;; # Zombie - dead but not reaped
+		*) code=1 ;; # Unknown or dead
+	esac
+	return $code
+}
+
 # rename our process
 task_id="rdv-task-${tag}"
 printf "%s" "${task_id}" > /proc/$$/comm
 
+# Enable job control
+# each & gets its own process group
+set -m
+
 ##
 # Ensure task will be interupted with us
 # see: https://mywiki.wooledge.org/SignalTrap
+# Launch task - job control puts it in its own process group
 "${task[@]}" &
 pid=$!
-echo "${pid} - ${tag}" > ${DAEMON_PIPE}
-wait ${pid}
+((pid > 0))   && echo "${pid} - ${tag}" > ${DAEMON_PIPE}
+
+# Monitor task state
+while kill -0 "$pid" 2> /dev/null; do
+	if ! is_task_healthy "$pid"; then
+		kill -TERM -"$pid" 2> /dev/null # Kill entire group
+		sleep 1
+		kill -9 -"$pid" 2> /dev/null # Force if needed
+		break
+	fi
+	sleep 1
+done
+
+# Call wait to get the exit code
+wait ${pid} 2> /dev/null
 code=${?}
 exit
