@@ -53,12 +53,11 @@
 # │ fzf           │ plugin pickers                       │
 # └───────────────┴──────────────────────────────────────┘
 #
-# TODO: feature: save the list of opened client's sessions in daemon
+# TODO: feature: save the list of all opened client's sessions in daemon
 #       in addition of sessions states, and on tmux starts propose
 #       to restore the last client's state
-# TODO: in picker for long time action make an _fzf-modal monitoring dialog that will not make
-#       the 'screen empty'
-# FIXME: rendez-vous-notify probably clear tmux-modal status bar Formats
+#
+# TODO: Auto restore sessions on new tmux run
 
 # shellcheck source-path=../tmux-bash-lib/lib
 source tmux::plugin.sh
