@@ -31,27 +31,47 @@ str::split "$(tmux show -gv '@rendez-vous-save-before-hook')" before_hook ' '
 str::split "$(tmux show -gv '@rendez-vous-save-after-hook')" after_hook ' '
 scrollback=$(tmux show -gv '@rendez-vous-save-scrollback')
 
+##
+# Save all opened sessions list
+ALL="$(list-rendez-vous --tmux)"
+if STATE_DIRECTORY=$(tmux show-environment -g TMUX_RDV_STATE); then
+	STATE_DIRECTORY=${STATE_DIRECTORY#TMUX_RDV_STATE=*}
+	echo "$ALL" > "${STATE_DIRECTORY}/sessions"
+	"$(tmux display -p '#{session_name}')" > "${STATE_DIRECTORY}/current"
+fi
+
+##
+# Setup lazy-tmux options
 lazy_tmux_opts=()
-if [[ "${#sessions[@]}" -eq 1 ]]; then
+if (( "${#sessions[@]}" > 0 )); then
+	sessions=("${sessions[0]}")
 	lazy_tmux_opts+=('--session' "${sessions[0]}")
 else
-	str::split "$(list-rendez-vous --tmux)" sessions
+	str::split "${ALL}" sessions
 	lazy_tmux_opts+=('--all')
 fi
 
 [[ ${scrollback} == "on" ]] && lazy_tmux_opts+=('--scrollback')
 
+##
+# pre-hook
 if command -v "${before_hook[0]}" &>/dev/null; then
 	before_hook+=("${sessions[@}]")
 	rdv-notify "${before_hook[*]}" "${before_hook[0]}"
 fi
 
+##
+# Lazy-tmux task
 if ! rdv-notify "lazy-tmux save ${lazy_tmux_opts[*]}" 'saving sessions'; then
 	exit 1
 fi
 
+##
+# sessions linked-windows handling
 rdv-notify "verify-linked-windows save ${sessions[*]}" 'save linked windows'
 
+##
+# post-hook
 if command -v "${after_hook[0]}" &>/dev/null; then
 	after_hook+=("${sessions[@]}")
 	rdv-notify "${after_hook[*]}" "${after_hook[0]}"

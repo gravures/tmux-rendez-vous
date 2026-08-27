@@ -85,6 +85,11 @@ plugin::set_default '@rendez-vous-connect-after-restore' on
 plugin::add_direnv bin
 
 ##
+#
+STATE_DIRECTORY="${XDG_STATE_HOME:-$HOME/.local/state}/tmux-rendez-vous"
+mkdir -p "${STATE_DIRECTORY}" && tmux set-environment -g TMUX_RDV_STATE "${STATE_DIRECTORY}"
+
+##
 # Commands Alias
 # shellcheck disable=SC2102,SC2086
 tmux set-option -s command-alias[700] "cd=attach-session -t . -c"
