@@ -2,6 +2,34 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+##  Changelog for release [v1.1.0]
+    
+    https://github.com/gravures/tmux-rendez-vous/compare/f35c61edfba7a3f23a36ebdf46d1a8ddc72dd90e..v1.1.0
+    2026-08-27
+  
+### Documentation
+
+  - **update README.md - ([b57580c](https://github.com/gravures/tmux-rendez-vous/commit/b57580ce6d351d41a4720a9dc42e9b030d8700ba)) - [@gravures](https://github.com/gravures)
+
+### Features
+
+  - **(connect)** connect-rendez-vous handle restoration of server state records - ([a89f17b](https://github.com/gravures/tmux-rendez-vous/commit/a89f17bf203ba6cc27d484eaa7e77f5b39e5258b)) - [@gravures](https://github.com/gravures)
+
+  - **(picker)** adds restore action to fzf picker - ([7aa0753](https://github.com/gravures/tmux-rendez-vous/commit/7aa0753ad130ece9a071b6b4a45168d7e90b9043)) - [@gravures](https://github.com/gravures)
+
+  - **(save)** save-rendez-vous now also records the server state - ([0730541](https://github.com/gravures/tmux-rendez-vous/commit/0730541d3c7c41216b7a17c7995109fbd7a0bef7)) - [@gravures](https://github.com/gravures)
+
+
+### Fixes
+
+  - **(notif)** fix bad task monitoring - ([89f1b25](https://github.com/gravures/tmux-rendez-vous/commit/89f1b25ec268d46a88bd4cd7adfa139f0f4df90a)) - [@gravures](https://github.com/gravures)
+
+  - **(picker)** avoid empty screen in fzf picker for open and close actions - ([f35c61e](https://github.com/gravures/tmux-rendez-vous/commit/f35c61edfba7a3f23a36ebdf46d1a8ddc72dd90e)) - [@gravures](https://github.com/gravures)
+
+
+
+- - -
+
 ##  Changelog for release [v1.0.0]
     
     https://github.com/gravures/tmux-rendez-vous/compare/67af7773f28c42f2b2e673ba6ee9be56fa40408c..v1.0.0
