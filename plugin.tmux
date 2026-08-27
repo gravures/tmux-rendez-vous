@@ -53,11 +53,12 @@
 # │ fzf           │ plugin pickers                       │
 # └───────────────┴──────────────────────────────────────┘
 #
-# TODO: feature: save the list of all opened client's sessions in daemon
-#       in addition of sessions states, and on tmux starts propose
-#       to restore the last client's state
-#
 # TODO: Auto restore sessions on new tmux run
+# TODO: Create A default `scratch-rendez-vous-session`:
+#        - should be a welcome like screen
+#        - should not be saved
+#        - could it be frozen?
+#        - should replace the 0 tmux session
 
 # shellcheck source-path=../tmux-bash-lib/lib
 source tmux::plugin.sh
