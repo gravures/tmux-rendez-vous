@@ -58,9 +58,18 @@ tmux-rendez-vous brings together two powerful tools into a single tmux workflow:
 - **[sesh](https://github.com/joshmedeski/sesh)** handles the smart parts of session management — it auto-names sessions from git repos or directories, integrates with zoxide for fast project jumping, and supports session configuration via `sesh.toml`.
 - **[lazy-tmux](https://github.com/alchemmist/lazy-tmux)** handles persistence — it snapshots your sessions (including running processes and scrollback) and restores them on demand, so you only pay the cost of the sessions you actually use.
 
-Rendez-vous wraps both behind a unified **picker** and adds a few extras: a **window-linker** for sharing windows across sessions, a **save daemon**, and a lightweight **notification system** for background tasks.
+**Rendez-vous** wraps both behind a unified **picker** and adds some extras:
 
-Once installed, the plugin injects its `bin/` directory into your tmux environment's `PATH` and registers a set of command aliases. The main entry point is the **rendez-vous picker**.
+- a **window-linker** for sharing windows across sessions
+- a **save daemon**
+- record the **server sessions state**
+- a lightweight **notification system** for background tasks
+
+> Note: all **sesh** direct commands are safe to use
+
+> Note: if you enable the **save daemon** be sure the **lazy-tmux** builtins daemon was not activated
+
+> Note: once installed, the plugin injects its `bin/` directory into your tmux environment's `PATH` and registers a set of command aliases. The main entry point is the **rendez-vous picker**.
 
 ## Usage
 
@@ -91,6 +100,7 @@ Select any item and press Enter to connect. A live preview (via `sesh preview`) 
 | `Ctrl-d` | Close selected session (saves then kills) |
 | `Ctrl-k` | Kill selected session (permanent delete with confirmation) |
 | `Ctrl-f` | Search directories with `fd` |
+| `Ctrl-r` | Restore the last saved server state |
 
 The plugin provides two entry points for the picker:
 
@@ -116,6 +126,10 @@ Enable it in your `tmux.conf`:
 set -g @rendez-vous-save-daemon-enabled on
 set -g @rendez-vous-save-daemon-interval 15   # minutes
 ```
+
+Each save also snapshots the current server state (open sessions and the active
+one) so you can restore your full workspace later — see
+[Restore Server State](#restore-server-state).
 
 You can also save manually at any time — either all sessions at once, or a specific one:
 
@@ -156,6 +170,28 @@ The same hook mechanism applies to the restore flow:
 
 All hooks are disabled by default (`off`). Set a hook to `off` or leave it unset to disable it.
 
+### Restore Server State
+
+Beyond saving individual sessions, every save also records the **server state** —
+the list of currently open sessions and which one is active — under
+`${XDG_STATE_HOME:-$HOME/.local/state}/tmux-rendez-vous`.
+
+> Note: this doesn't require the **saver daemon** to run
+
+This lets you bring a whole workspace back exactly as you left it:
+
+```bash
+tmux run 'connect-rendez-vous'   # restore all saved sessions and reconnect to the active one
+```
+
+When called with no argument, `connect-rendez-vous` reads the recorded state,
+restores every sleeping session that was open, and automatically reconnects to the
+session that was active when the state was saved.
+
+From the picker, press `Ctrl-r` to restore the last saved server state without
+leaving the popup. This is especially handy after a tmux server restart: run the
+restore once and your full session layout returns.
+
 ### Notification System
 
 ![notification](img/notification.png)
@@ -168,7 +204,7 @@ When a task is running, you'll see a spinning indicator and task labels in the `
 - ✓ appears briefly when a task completes (fades after 3 seconds)
 - ✗ appears when a task fails or is killed (fades after 6 seconds)
 
-The notification daemon starts on demand and exits automatically once all tasks are done — no configuration required.
+The notification daemon starts on demand and exits automatically once all tasks are done — no configuration required. It also monitors task health and cleans up stalled or zombie tasks.
 
 ### Window-Linker
 
@@ -259,6 +295,7 @@ See [Hooks](#hooks) above for details on save/restore hook options.
 
 You might also like these plugins:
 
+- [tmux-tab](https://github.com/leohenon/tmux-tab) — alt-tab for tmux sessions (Recommoned along side **rendez-vous**)
 - [tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect) — Save and restore tmux sessions
 - [tmux-continuum](https://github.com/tmux-plugins/tmux-continuum) — Continuous saving of tmux environment
 - [tmux-zen-status](https://github.com/gravures/tmux-zen-status) — Which-key menu and auto-hidable status bar
