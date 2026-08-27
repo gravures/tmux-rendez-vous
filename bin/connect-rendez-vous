@@ -8,8 +8,68 @@
 _path="$(tmux show-environment -g PATH)"
 export PATH="$PATH:${_path##*=}"
 
+# shellcheck source-path=../tmux-bash-lib/lib
+source bash::string.sh
+
+##
+# Session Restoration Process
+function restore() {
+	local session=${1}
+	local connect=${2:-off}
+	local before_hook after_hook
+
+	str::split "$(tmux show -gv '@rendez-vous-restore-before-hook')" before_hook ' '
+	str::split "$(tmux show -gv '@rendez-vous-restore-after-hook')" after_hook ' '
+
+	if command -v "${before_hook[0]}" &> /dev/null; then
+		before_hook+=("${session}")
+		rdv-notify "${before_hook[*]}" "${before_hook[0]}"
+	fi
+
+	rdv-notify "lazy-tmux wakeup --session ${session}" 'restoring session'
+
+	##
+	# Handle linked windows in session
+	# we need to release the mutex lock to allow
+	# the subprocess to call another connect-rendez-vous
+	# process if needed.
+	mutex::unlock "${MUTEX_SESSIONS_OP_LOCK}"
+	rdv-notify "verify-linked-windows restore ${session}" 'restore linked windows'
+	while mutex::locked "${MUTEX_SESSIONS_OP_LOCK}"; do sleep 0.1; done
+	mutex::lock "${MUTEX_SESSIONS_OP_LOCK}"
+
+	# run user after hook
+	if command -v "${after_hook[0]}" &> /dev/null; then
+		after_hook+=("${session}")
+		rdv-notify "${after_hook[*]}" "${after_hook[0]}"
+	fi
+
+	# connect if opt-in
+	if [[ ${connect} == "on" ]]; then
+		sesh connect "${session}"
+	fi
+}
+
 session=${1}
-if [[ -z ${session} ]]; then exit 0; fi
+
+# Restore client state record
+if [[ -z ${session} ]]; then
+	if STATE_DIRECTORY=$(tmux show-environment -g TMUX_RDV_STATE); then
+		sessions=()
+		STATE_DIRECTORY=${STATE_DIRECTORY#TMUX_RDV_STATE=*}
+		current=$(< "${STATE_DIRECTORY}/current") 2> /dev/null
+		str::split "$(< "${STATE_DIRECTORY}/sessions")" sessions 2> /dev/null
+
+		for session in "${sessions[@]}"; do
+			[[ ${session} == "${current}" ]] && connect=on || connect=off
+			restore "${session}" "${connect}" 2> /dev/null
+		done
+	fi
+
+	# update records sessions in case others were opened before
+	"$(list-rendez-vous --tmux)" > "${STATE_DIRECTORY}/sessions"
+	exit 0
+fi
 
 ##
 # check if session should be restored
@@ -51,8 +111,6 @@ fi
 #
 # Acquire sessions operations lock
 # shellcheck source-path=../tmux-bash-lib/lib
-source bash::string.sh
-# shellcheck source-path=../tmux-bash-lib/lib
 source bash::mutex.sh
 declare -r MUTEX_SESSIONS_OP_LOCK=${MUTEX_LOCK_DIR}/sessions_op.lock
 
@@ -64,36 +122,4 @@ on_exit() {
 if ! mutex::lock ${MUTEX_SESSIONS_OP_LOCK} 2> /dev/null; then exit 0; fi
 trap on_exit INT TERM EXIT
 
-##
-# Restoration
-str::split "$(tmux show -gv '@rendez-vous-restore-before-hook')" before_hook ' '
-str::split "$(tmux show -gv '@rendez-vous-restore-after-hook')" after_hook ' '
-
-if command -v "${before_hook[0]}" &> /dev/null; then
-	before_hook+=("${session}")
-	rdv-notify "${before_hook[*]}" "${before_hook[0]}"
-fi
-
-rdv-notify "lazy-tmux wakeup --session ${session}" 'restoring session'
-
-##
-# Handle linked windows in session
-# we need to release the mutex lock to allow
-# the subprocess to call another connect-rendez-vous
-# process if needed.
-
-mutex::unlock ${MUTEX_SESSIONS_OP_LOCK}
-rdv-notify "verify-linked-windows restore ${session}" 'restore linked windows'
-while mutex::locked ${MUTEX_SESSIONS_OP_LOCK}; do sleep 0.1; done
-mutex::lock ${MUTEX_SESSIONS_OP_LOCK}
-
-# run user after hook
-if command -v "${after_hook[0]}" &> /dev/null; then
-	after_hook+=("${session}")
-	rdv-notify "${after_hook[*]}" "${after_hook[0]}"
-fi
-
-# connect if user opt-in
-if [[ "$(tmux show -gv '@rendez-vous-connect-after-restore')" == "on" ]]; then
-	sesh connect "${session}"
-fi
+restore "${session}" "$(tmux show -gv '@rendez-vous-connect-after-restore')"
