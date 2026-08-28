@@ -7,11 +7,16 @@ _path="$(tmux show-environment -g PATH)"
 export PATH="$PATH:${_path##*=}"
 
 forget=false
+kill=false
 
 while true; do
 	case ${1} in
-		--kill | -k)
+		--forget | -f)
 			forget=true
+			shift 1
+			;;
+		--kill | -k)
+			kill=true
 			shift 1
 			;;
 		-*)
@@ -30,18 +35,16 @@ if [[ -z ${session} ]]; then exit 0; fi
 # test if session is alive
 while IFS= read -r item; do
 	if [[ ${item} == "${session}" ]]; then
-		tmux run "save-rendez-vous ${session}" \
-			&& tmux kill-session -t "${session}"
+		${forget} || tmux run "save-rendez-vous ${session}"
+		tmux kill-session -t "${session}"
 	fi
 done < <(printf '%s\n' "$(sesh list --tmux)")
 
-if ! ${forget}; then
-	exit
+if ${kill}; then
+	# check if session is a saved item
+	while IFS= read -r item; do
+		if [[ ${item} == "${session}" ]]; then
+			lazy-tmux forget --session "${session}"
+		fi
+	done < <(printf '%s\n' "$(lazy-tmux list | cut -f1)")
 fi
-
-# check if session is a saved item
-while IFS= read -r item; do
-	if [[ ${item} == "${session}" ]]; then
-		lazy-tmux forget --session "${session}"
-	fi
-done < <(printf '%s\n' "$(lazy-tmux list | cut -f1)")

@@ -2,7 +2,6 @@
 #
 # Session-Picker
 #
-# TODO: make an action that will close a session without save
 
 # Safe guard against corrupted environment
 _path="$(tmux show-environment -g PATH)"
@@ -16,7 +15,7 @@ list-rendez-vous --icons | fzf \
 	--padding 0,0,4%,0 \
 	--input-label ' rendez-vous ' \
 	--border bottom \
-	--border-label ' <^a> all ● <^t> tmux ● <^s> sleeping ● <^g> configs ● <^x> zoxide ● <^d> close ● <^k> kill ● <^f> find ● <^r> restore ' \
+	--border-label ' <^a> all ● <^t> tmux ● <^s> sleeping ● <^g> configs ● <^x> zoxide ● <^q> close ● <^d> delete ● <^k> kill ● <^f> find ● <^r> restore ' \
 	--ghost search \
 	--list-label ' results ' \
 	--no-sort --ansi \
@@ -31,7 +30,8 @@ list-rendez-vous --icons | fzf \
 	--bind 'ctrl-s:change-prompt(  )+reload(list-rendez-vous -s --icons)' \
 	--bind 'ctrl-g:change-prompt(⚙️  )+reload(list-rendez-vous -c --icons)' \
 	--bind 'ctrl-x:change-prompt(📁  )+reload(list-rendez-vous -z --icons)' \
-	--bind 'ctrl-d:execute-silent(close-rendez-vous {2..})+change-prompt(⚡  )+reload(list-rendez-vous --icons)' \
+	--bind 'ctrl-q:execute-silent(close-rendez-vous {2..})+change-prompt(⚡  )+reload(list-rendez-vous --icons)' \
+	--bind 'ctrl-d:transform(_fzf-modal confirm "Session will be closed without save, continue" "execute{close-rendez-vous --forget \{2..}}+change-prompt{⚡  }+reload{list-rendez-vous --icons}" "execute{:}")' \
 	--bind 'ctrl-k:transform(_fzf-modal confirm "Session will be closed and permantly deleted, continue" "execute{close-rendez-vous --kill \{2..}}+change-prompt{⚡  }+reload{list-rendez-vous --icons}" "execute{:}")' \
 	--bind 'ctrl-f:change-prompt(🔎  )+reload(fd -H -d 2 -t d -E .Trash . ~)' \
 	--bind 'ctrl-r:execute-silent(connect-rendez-vous)+abort' \
