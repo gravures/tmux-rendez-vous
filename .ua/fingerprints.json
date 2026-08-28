@@ -1,121 +1,11 @@
 {
   "version": "1.0.0",
-  "gitCommitHash": "1154a1addf6bbfdc547b777e8b2c03304db9609e",
-  "generatedAt": "2026-08-25T11:00:04.965Z",
+  "gitCommitHash": "85e645141e1542bf1733bb7212887734f0d72530",
+  "generatedAt": "2026-08-28T09:54:39.235Z",
   "files": {
-    ".harper-dictionary.txt": {
-      "filePath": ".harper-dictionary.txt",
-      "contentHash": "886b7c5c6aeb6c66a17082254caa3940f22bbf5aacb2db6171d49fab9c45c8b0",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 15,
-      "hasStructuralAnalysis": false
-    },
-    ".pre-commit-config.yaml": {
-      "filePath": ".pre-commit-config.yaml",
-      "contentHash": "b24a1b6472fad52141f791bee252557f984a9ce8b902b69745cc2ce3fa78556e",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 42,
-      "hasStructuralAnalysis": true
-    },
-    ".shellcheckrc": {
-      "filePath": ".shellcheckrc",
-      "contentHash": "4d54261dc640c0f5493c30989fffac7eeaa9c12b2822fd6a5acad5802da89ef9",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 4,
-      "hasStructuralAnalysis": false
-    },
-    ".ua/.understandignore": {
-      "filePath": ".ua/.understandignore",
-      "contentHash": "461a2a356adc87196198d65e40e29306997969cc3ef22d43d6d99a912ffee712",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 75,
-      "hasStructuralAnalysis": false
-    },
-    ".ua/config.json": {
-      "filePath": ".ua/config.json",
-      "contentHash": "e6e1895a8e3cb71f76daebccd84c4fc9877d8a88fb75e476ca22a320e69d4995",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 2,
-      "hasStructuralAnalysis": true
-    },
-    ".ua/fingerprints.json": {
-      "filePath": ".ua/fingerprints.json",
-      "contentHash": "8138825eafd428acbbeae15dc82778de377f8497e5482ede432c99b7d15cc49e",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 177,
-      "hasStructuralAnalysis": true
-    },
-    ".ua/knowledge-graph.json": {
-      "filePath": ".ua/knowledge-graph.json",
-      "contentHash": "29c1cbb7db18228df6c6831691fa90263dcd5527b37ad78d5af8d11363b5c091",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 859,
-      "hasStructuralAnalysis": true
-    },
-    ".ua/meta.json": {
-      "filePath": ".ua/meta.json",
-      "contentHash": "2dbac1cf521819c60f74cb38b35fc0de24ddd824a5c669e5217105a3f94e7216",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 7,
-      "hasStructuralAnalysis": true
-    },
     "AGENTS.md": {
       "filePath": "AGENTS.md",
-      "contentHash": "48f1142e3da14f2b931f3ff870100bd86285410b7ba2702a50196ee402e740da",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 54,
-      "hasStructuralAnalysis": true
-    },
-    "CHANGELOG.md": {
-      "filePath": "CHANGELOG.md",
-      "contentHash": "a557112be30e9872604cb8d78a053fb72205f66ee605c67325a4b0adbba7ff03",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 58,
-      "hasStructuralAnalysis": true
-    },
-    "CODE_OF_CONDUCT.md": {
-      "filePath": "CODE_OF_CONDUCT.md",
-      "contentHash": "dc57b3fbe893687539191aa152cebda84835d24d1fe335513bb086f48f132213",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 133,
-      "hasStructuralAnalysis": true
-    },
-    "CONTRIBUTING.md": {
-      "filePath": "CONTRIBUTING.md",
-      "contentHash": "89d0a16f6a820d3014e5c40db50ad0d65a45b436083859fe07be8819d352346e",
+      "contentHash": "45d0c3d83524113c6ca6aaf8f7339490ab6bf71117100143e931ae33dc40edd8",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -123,195 +13,55 @@
       "totalLines": 53,
       "hasStructuralAnalysis": true
     },
-    "README.md": {
-      "filePath": "README.md",
-      "contentHash": "aef0df13926813e9363bed830b2934947ac7fad12b49cae03f64b51c12f0f2db",
+    "plugin.tmux": {
+      "filePath": "plugin.tmux",
+      "contentHash": "959625e509536ceb997dad734166bccf28ed38606482ae5486832d77436351e8",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 229,
-      "hasStructuralAnalysis": true
-    },
-    "bin/_fzf-modal": {
-      "filePath": "bin/_fzf-modal",
-      "contentHash": "3d5a4a644e4f113f155a279333cfc2e079add98f3eb0940e88c6d205af6e1903",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 240,
+      "totalLines": 107,
       "hasStructuralAnalysis": false
     },
     "bin/close-rendez-vous": {
       "filePath": "bin/close-rendez-vous",
-      "contentHash": "e47fb2fa6709c8a2dbd3a16405adbe27181eb7d9df3cc836a80d42619829087a",
+      "contentHash": "31106ff10d876fa81bd1c63d0a718126c1127ccda1e98c094839f42f1e20f46f",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 48,
-      "hasStructuralAnalysis": false
-    },
-    "bin/connect-rendez-vous": {
-      "filePath": "bin/connect-rendez-vous",
-      "contentHash": "027ac6d42c9f5e42af9500705e1cd6ac25164b8293b746496064280db2e570b7",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 101,
+      "totalLines": 51,
       "hasStructuralAnalysis": false
     },
     "bin/list-rendez-vous": {
       "filePath": "bin/list-rendez-vous",
-      "contentHash": "88b4cbde9e7e528f7bb201367f75e318c88ab61ff8ea45f71bca4a219aa9327b",
+      "contentHash": "c0537cf94120d3cef70c2ac14338c3489c823f0426753e91aa12fa39c89e0a84",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 58,
-      "hasStructuralAnalysis": false
-    },
-    "bin/rdv-notify": {
-      "filePath": "bin/rdv-notify",
-      "contentHash": "fff6c96f1b9563f336a78530b89bf6ccc0b713e7abb19fbd62c163e01f79c115",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 179,
-      "hasStructuralAnalysis": false
-    },
-    "bin/rdv-saver-daemon": {
-      "filePath": "bin/rdv-saver-daemon",
-      "contentHash": "f67d34c85f4e92ea6f4509a15d0c7919db25274421f7c692c06dce69cfe38e09",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 52,
-      "hasStructuralAnalysis": false
-    },
-    "bin/rendez-vous": {
-      "filePath": "bin/rendez-vous",
-      "contentHash": "d54df88204cce315123e66467933f70d3a255973de4557615b618e1757526636",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 9,
+      "totalLines": 57,
       "hasStructuralAnalysis": false
     },
     "bin/rendez-vous-picker": {
       "filePath": "bin/rendez-vous-picker",
-      "contentHash": "f91c83957d502f768279f74da3bbfc0216b17ec792b27e95d4c3ab9c28a79627",
+      "contentHash": "4de0b100ad7bc3536736edda371d8485ff523b546644cc5f3aa289de89e834dc",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 45,
+      "totalLines": 44,
       "hasStructuralAnalysis": false
     },
     "bin/save-rendez-vous": {
       "filePath": "bin/save-rendez-vous",
-      "contentHash": "b2765cbbaf93767a672c02204d9751ee0722184cd13d124518490ab5d1d99b3a",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 61,
-      "hasStructuralAnalysis": false
-    },
-    "bin/verify-linked-windows": {
-      "filePath": "bin/verify-linked-windows",
-      "contentHash": "756d99b3258a19ca7183043d21ea09e6883b31e3bcd467a34128bd7408009520",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 199,
-      "hasStructuralAnalysis": false
-    },
-    "bin/window-linker": {
-      "filePath": "bin/window-linker",
-      "contentHash": "bd029f0ab78a3b011ac6ec9e0dbd9f3fa0f5470cd72977eda65166e937a0ff67",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 46,
-      "hasStructuralAnalysis": false
-    },
-    "changelog.tera": {
-      "filePath": "changelog.tera",
-      "contentHash": "e156de29e5c27a7fa9d77a58a7bdba9b63e92ed82fb59667de9085e8f818d165",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 81,
-      "hasStructuralAnalysis": false
-    },
-    "cog.toml": {
-      "filePath": "cog.toml",
-      "contentHash": "7e5bc4e47ef262f7ab1d3906d5455e32d7153b050ac964c001fc5027a9db357e",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 43,
-      "hasStructuralAnalysis": true
-    },
-    "notes/popup-with-scratch-session.md": {
-      "filePath": "notes/popup-with-scratch-session.md",
-      "contentHash": "0d9d49adbc35b9a8593957eed1504795e69a12df56f6c11643b4e76c98465a6c",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 11,
-      "hasStructuralAnalysis": true
-    },
-    "plugin.tmux": {
-      "filePath": "plugin.tmux",
-      "contentHash": "2a12e46f803981f97a3c06a002e1cb4e5c791b46adb20b4d183e621019d7cf40",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 101,
-      "hasStructuralAnalysis": false
-    },
-    "pyrightconfig.json": {
-      "filePath": "pyrightconfig.json",
-      "contentHash": "47f45fd6ef547d8f97ab289da6ea23d7042e6c453cbf4c80de90765844f4d4c4",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 123,
-      "hasStructuralAnalysis": true
-    },
-    "ruff.toml": {
-      "filePath": "ruff.toml",
-      "contentHash": "4f4b90ce7609602eb90edd310f4ea545e74142926389b43e8e5fb01939353ab6",
+      "contentHash": "71beb4c67cf38b84dc19a342edf548dee9f3b5f7b45675b982c1921bcd3ebb81",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
       "totalLines": 74,
-      "hasStructuralAnalysis": true
-    },
-    "rumdl.toml": {
-      "filePath": "rumdl.toml",
-      "contentHash": "1e811a039e5ac712c03f05870390609a840511e17e971e949b415cbcba18fa56",
-      "functions": [],
-      "classes": [],
-      "imports": [],
-      "exports": [],
-      "totalLines": 4,
-      "hasStructuralAnalysis": true
+      "hasStructuralAnalysis": false
     }
   }
 }

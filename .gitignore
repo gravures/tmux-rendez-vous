@@ -24,3 +24,4 @@ tmp/
 .ua/intermediate/
 .ua/.trash-*/
 .ua/diff-overlay.json
+.vite/
