@@ -2,6 +2,28 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+##  Changelog for release [v1.2.0]
+    
+    https://github.com/gravures/tmux-rendez-vous/compare/7832381b9e76ae304dd892982ee0d79b7ad76156..v1.2.0
+    2026-08-28
+  
+### Documentation
+
+  - **update readme for new release - ([28185d0](https://github.com/gravures/tmux-rendez-vous/commit/28185d073f0fb315d480b381fa439ae30d65993f)) - [@gravures](https://github.com/gravures)
+
+### Features
+
+  - **(picker)** adds an action to close a session without save - ([1183f23](https://github.com/gravures/tmux-rendez-vous/commit/1183f23cd363605260d697aea912c1894a2bcf9d)) - [@gravures](https://github.com/gravures)
+
+
+### Fixes
+
+  - **(save)** prevent saving blacklisted session in sesh config - ([7832381](https://github.com/gravures/tmux-rendez-vous/commit/7832381b9e76ae304dd892982ee0d79b7ad76156)) - [@gravures](https://github.com/gravures)
+
+
+
+- - -
+
 ##  Changelog for release [v1.1.0]
     
     https://github.com/gravures/tmux-rendez-vous/compare/f35c61edfba7a3f23a36ebdf46d1a8ddc72dd90e..v1.1.0
