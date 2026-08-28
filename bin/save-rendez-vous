@@ -43,14 +43,7 @@ fi
 ##
 # Setup lazy-tmux options
 lazy_tmux_opts=()
-if (( "${#sessions[@]}" > 0 )); then
-	sessions=("${sessions[0]}")
-	lazy_tmux_opts+=('--session' "${sessions[0]}")
-else
-	str::split "${ALL}" sessions
-	lazy_tmux_opts+=('--all')
-fi
-
+(( "${#sessions[@]}" == 0 )) && str::split "${ALL}" sessions
 [[ ${scrollback} == "on" ]] && lazy_tmux_opts+=('--scrollback')
 
 ##
@@ -62,9 +55,9 @@ fi
 
 ##
 # Lazy-tmux task
-if ! rdv-notify "lazy-tmux save ${lazy_tmux_opts[*]}" 'saving sessions'; then
-	exit 1
-fi
+for session in "${sessions[@]}"; do
+	rdv-notify "lazy-tmux save ${lazy_tmux_opts[*]} --session ${session}" "save ${session}"
+done
 
 ##
 # sessions linked-windows handling
