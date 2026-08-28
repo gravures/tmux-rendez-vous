@@ -22,4 +22,5 @@ tmp/
 # AI Helpers
 .opencode/
 .ua/intermediate/
+.ua/.trash-*/
 .ua/diff-overlay.json
