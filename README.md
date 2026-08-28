@@ -97,8 +97,9 @@ Select any item and press Enter to connect. A live preview (via `sesh preview`) 
 | `Ctrl-s` | Show only sleeping sessions |
 | `Ctrl-g` | Show only config sessions |
 | `Ctrl-x` | Show only zoxide directories |
-| `Ctrl-d` | Close selected session (saves then kills) |
-| `Ctrl-k` | Kill selected session (permanent delete with confirmation) |
+| `Ctrl-q` | Close selected session (saves then kills) |
+| `Ctrl-d` | Delete selected session (close without saving, stored session kept on disk) |
+| `Ctrl-k` | Kill selected session (close and permanently delete from disk, with confirmation) |
 | `Ctrl-f` | Search directories with `fd` |
 | `Ctrl-r` | Restore the last saved server state |
 
@@ -249,14 +250,19 @@ The plugin registers the following tmux command aliases for convenience:
 
 ### Close Session
 
-Save and close a session, or permanently delete it:
+Save and close a session, delete it without saving, or permanently delete it:
 
 ```bash
-tmux run 'close-rendez-vous <session>'        # save then kill
-tmux run 'close-rendez-vous --kill <session>'  # save, kill, and forget
+tmux run 'close-rendez-vous <session>'                 # save then kill
+tmux run 'close-rendez-vous --forget <session>'        # close without saving, keep stored session on disk
+tmux run 'close-rendez-vous --kill <session>'          # close and permanently delete from disk
 ```
 
-The `--kill` (`-k`) flag additionally removes the session from `lazy-tmux` storage, permanently deleting it.
+- default (no flag): saves the session, then kills it
+- `--forget` / `-f`: closes without saving, but leaves the stored session as it was on disk
+- `--kill` / `-k`: closes and removes the session from `lazy-tmux` storage, permanently deleting it
+
+These three actions are also available from the picker as `Ctrl-q` (close), `Ctrl-d` (delete), and `Ctrl-k` (kill); the destructive ones are guarded by a confirmation dialog.
 
 ### List Sessions
 
