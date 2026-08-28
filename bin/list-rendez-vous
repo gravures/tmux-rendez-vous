@@ -9,12 +9,12 @@
 #
 for opt in "${@}"; do
 	case ${opt} in
-	--icons) icon=--icons ;;
-	--tmux | -t) tmux=true ;;
-	--sleep | -s) sleep=true ;;
-	--config | -c) config=true ;;
-	--zoxide | -z) zoxide=true ;;
-	*) : ;;
+		--icons) icon=--icons ;;
+		--tmux | -t) tmux=true ;;
+		--sleep | -s) sleep=true ;;
+		--config | -c) config=true ;;
+		--zoxide | -z) zoxide=true ;;
+		*) : ;;
 	esac
 done
 
@@ -33,7 +33,6 @@ if [[ -v tmux ]]; then
 	done < <(sesh list --tmux "${icon}")
 fi
 
-# FIXME: regex filter could skip session name (eg: tmux)
 if [[ -v sleep ]]; then
 	[[ ${icon} ]] && ic=" "
 	while IFS= read -r line; do
